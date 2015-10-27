@@ -53,7 +53,7 @@ const (
 	Ge
 	// Not
 	N
-	// Exit in tags
+	// Exits in tags
 	Ex
 	// Contains
 	Cnts

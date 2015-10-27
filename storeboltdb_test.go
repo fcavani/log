@@ -7,7 +7,7 @@ package log
 import (
 	"testing"
 	"os"
-	
+
 	"github.com/fcavani/rand"
 	"github.com/fcavani/e"
 	"github.com/boltdb/bolt"
@@ -21,7 +21,7 @@ func TestBoltDb(t *testing.T) {
 	}
 	name = os.TempDir() + "/" + name
 	gob := &Gob{
-		TypeName: types.Name(int(0)),
+		TypeName: types.Name(&TestStruct{I: 0}),
 	}
 	addstore(t, NewBoltDb, "test", name, os.FileMode(0600), &bolt.Options{}, gob, gob)
 }

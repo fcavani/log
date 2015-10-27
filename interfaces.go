@@ -82,6 +82,7 @@ type Storer interface {
 	SupportTx() bool
 	Tx(write bool, f func(tx Transaction) error) error
 	Len() (uint, error)
+	Drop() error
 }
 
 type Levels interface {

@@ -8,10 +8,63 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/fcavani/e"
+	"github.com/fcavani/tags"
 	"github.com/fcavani/rand"
+	"github.com/fcavani/types"
 )
+
+type TestStruct struct {
+	Key string `bson:"key"`
+	I int
+}
+
+func (et *TestStruct) Date() time.Time {
+	return time.Time{}
+}
+
+func (et *TestStruct) Level() Level {
+	return FatalPrio
+}
+
+func (et *TestStruct) Message() string {
+	return ""
+}
+
+func (et *TestStruct) Tags() *tags.Tags {
+	return nil
+}
+
+func (et *TestStruct) Domain(d string) Logger {
+	return nil
+}
+
+func (et *TestStruct) GetDomain() string {
+	return ""
+}
+
+func (et *TestStruct) Err() error {
+	return nil
+}
+
+func (et *TestStruct) String() string {
+	return ""
+}
+
+func (et *TestStruct) Bytes() []byte {
+	return nil
+}
+
+func (et *TestStruct) Formatter(f Formatter) {
+
+}
+
+func init() {
+	types.Insert(&TestStruct{})
+}
+
 
 type store struct {
 	Name  string
@@ -64,6 +117,15 @@ func addstore(t *testing.T, f interface{}, params ...interface{}) {
 }
 
 func empty(t *testing.T, s Storer) {
+	defer func() {
+		if r := recover(); r != "" {
+			if str, ok := r.(string); ok {
+				if str != "not implemented" {
+					t.Fatal(str)
+				}
+			}
+		}
+	}()
 	err := s.Tx(true, func(tx Transaction) error {
 		_, err := tx.Get("none")
 		return err
@@ -96,24 +158,25 @@ func empty(t *testing.T, s Storer) {
 		c := tx.Cursor()
 		key, data := c.First()
 		if key != "" || data != nil {
-			return e.New("not empty")
-		}
-		key, data = c.Last()
-		if key != "" || data != nil {
-			return e.New("not empty")
-		}
-		key, data = c.Next()
-		if key != "" || data != nil {
-			return e.New("not empty")
-		}
-		key, data = c.Prev()
-		if key != "" || data != nil {
-			return e.New("not empty")
+			return e.New("not empty %v", key)
 		}
 		key, data = c.Seek("ing for gophers?")
 		if key != "" || data != nil {
-			return e.New("not empty")
+			return e.New("not empty %v", key)
 		}
+		key, data = c.Next()
+		if key != "" || data != nil {
+			return e.New("not empty %v", key)
+		}
+		key, data = c.Last()
+		if key != "" || data != nil {
+			return e.New("not empty %v", key)
+		}
+		key, data = c.Prev()
+		if key != "" || data != nil {
+			return e.New("not empty %v", key)
+		}
+
 		return nil
 	})
 	if err != nil {
@@ -141,8 +204,17 @@ func empty(t *testing.T, s Storer) {
 }
 
 func readonly(t *testing.T, s Storer) {
+	defer func() {
+		if r := recover(); r != "" {
+			if str, ok := r.(string); ok {
+				if str != "not implemented" {
+					t.Fatal(str)
+				}
+			}
+		}
+	}()
 	err := s.Tx(false, func(tx Transaction) error {
-		return tx.Put("none", "foo")
+		return tx.Put("none", &TestStruct{I:0, Key:"0"})
 	})
 	if err != nil && !e.Equal(err, ErrReadOnly) {
 		t.Fatal(e.Trace(e.Forward(err)))
@@ -175,12 +247,16 @@ func put(t *testing.T, s Storer, num int) {
 		var err error
 		for i := 0; i < num; i++ {
 			key := strconv.Itoa(i)
-			err = tx.Put(key, i)
+			err = tx.Put(key, &TestStruct{I:i, Key:key})
 			if err != nil {
 				return err
 			}
 		}
-		err = tx.Put("3a", 3)
+		err = tx.Put("3a", &TestStruct{I:3, Key:"3a"})
+		if err != nil {
+			return err
+		}
+		err = tx.Put("3a", &TestStruct{I:3, Key:"3a"})
 		if err != nil {
 			return err
 		}
@@ -194,30 +270,33 @@ func put(t *testing.T, s Storer, num int) {
 		t.Fatal(e.Trace(e.Forward(err)))
 	}
 	if l != uint(num+1) {
-		t.Fatalf("wrong len %v", l)
+		t.Fatalf("wrong len %v %v", l, num)
 	}
+}
+
+func length(t *testing.T, s Storer, num int) {
+	l, err := s.Len()
+	if err != nil {
+		t.Fatal(e.Trace(e.Forward(err)))
+	}
+	if l != uint(num) {
+		t.Fatalf("something remining %v != %v", l, num)
+	}
+	t.Log("Database num records:", l)
 }
 
 func get(t *testing.T, s Storer, num int) {
 	err := s.Tx(false, func(tx Transaction) error {
 		for i := 0; i < num; i++ {
 			key := strconv.Itoa(i)
-			data, err := tx.Get(key)
+			_, err := tx.Get(key)
 			if err != nil {
-				return err
-			}
-			ii := data.(int)
-			if ii != i {
-				return e.New("retrieve wrong data %v %v %v", key, i, ii)
+				return e.Push(err, e.New("key %v not found", key))
 			}
 		}
-		data, err := tx.Get("3a")
+		_, err := tx.Get("3a")
 		if err != nil {
-			return err
-		}
-		ii := data.(int)
-		if ii != 3 {
-			return e.New("retrieve wrong data %v", ii)
+			return e.New(err)
 		}
 		return nil
 	})
@@ -255,6 +334,15 @@ func del(t *testing.T, s Storer, num int) {
 }
 
 func iter(t *testing.T, s Storer, num int) {
+	defer func() {
+		if r := recover(); r != "" {
+			if str, ok := r.(string); ok {
+				if str != "not implemented" {
+					t.Fatal(str)
+				}
+			}
+		}
+	}()
 	err := s.Tx(true, func(tx Transaction) error {
 		err := tx.Del("3a")
 		if err != nil {
@@ -265,7 +353,7 @@ func iter(t *testing.T, s Storer, num int) {
 		kk, _ := c.First()
 		for k, _ := c.Next(); k != ""; k, _ = c.Next() {
 			if k <=  kk {
-				return e.New("retrieve wrong key %v", k)
+				return e.New("retrieve wrong key %v %v", k, kk)
 			}
 			kk = k
 			i++
@@ -276,7 +364,7 @@ func iter(t *testing.T, s Storer, num int) {
 		kk, _ = c.Last()
 		for k, _ := c.Last(); k != ""; k, _ = c.Prev() {
 			if k > kk {
-				return e.New("retrieve wrong key %v", k)
+				return e.New("retrieve wrong key %v %v", kk, k)
 			}
 			kk = k
 			i--
@@ -284,13 +372,17 @@ func iter(t *testing.T, s Storer, num int) {
 		if i != 0 {
 			t.Fatal("cursor didn't run", i)
 		}
-		k, v := c.Seek("80")
+		k, _ := c.Seek("80")
 		if k != "80" {
 			return e.New("Seek failed %v", k)
 		}
-		data := v.(int)
-		if data != 80 {
-			return e.New("Seek failed %v", data)
+		k, _ = c.Next()
+		if k != "81" {
+			return e.New("Next after Seek failed %v", k)
+		}
+		k, _ = c.Seek("80")
+		if k != "80" {
+			return e.New("Seek failed %v", k)
 		}
 		err = c.Del()
 		if err != nil {
@@ -302,25 +394,25 @@ func iter(t *testing.T, s Storer, num int) {
 		} else if err == nil {
 			return e.New("returned nil")
 		}
-		k, v = c.Seek("80")
+		k, _ = c.Seek("80")
 		if k != "81" {
 			return e.New("Seek failed %v", k)
 		}
-		k, v = c.Seek("zzzzzz")
+		k, _ = c.Seek("zzzzzz")
 		if k != "" {
 			return e.New("Seek failed %v", k)
 		}
-		i = 0
-		for k, _ := c.First(); k != ""; k, _ = c.First() {
-			err = c.Del()
-			if err != nil {
-				return e.Forward(err)
-			}
-			i++
-		}
-		if i != 99 {
-			return e.New("cursor didn't run %v", i)
-		}
+		// i = 0
+		// for k, _ := c.First(); k != ""; k, _ = c.Next() {
+		// 	err = c.Del()
+		// 	if err != nil {
+		// 		return e.Forward(err)
+		// 	}
+		// 	i++
+		// }
+		// if i != 99 {
+		// 	return e.New("cursor didn't run %v", i)
+		// }
 		return nil
 	})
 	if err != nil {
@@ -330,13 +422,13 @@ func iter(t *testing.T, s Storer, num int) {
 	if err != nil {
 		t.Fatal(e.Trace(e.Forward(err)))
 	}
-	if l != 0 {
+	if l != 99 {
 		t.Fatalf("something remining %v", l)
 	}
 }
 
 func testsort(t *testing.T, s Storer) {
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 50; i++ {
 		err := s.Tx(true, func(tx Transaction) error {
 			var err error
 			out := make(rand.StringPermutation, len(rand.LowerCase))
@@ -346,7 +438,7 @@ func testsort(t *testing.T, s Storer) {
 			}
 			//t.Log(out)
 			for i, key := range out {
-				err = tx.Put(key, i)
+				err = tx.Put(key, &TestStruct{I:i, Key:key})
 				if err != nil {
 					return err
 				}
@@ -366,15 +458,58 @@ func testsort(t *testing.T, s Storer) {
 					t.Log("not in alphabetic sequence")
 					t.Fail()
 				}
-				err := c.Del()
-				if err != nil {
-					return err
-				}
+				// err := c.Del()
+				// if err != nil {
+				// 	return err
+				// }
 			}
 			return nil
 		})
 		if err != nil {
 			t.Fatal(e.Trace(e.Forward(err)))
 		}
+		err = s.Drop()
+		if err != nil {
+			t.Fatal(e.Trace(e.Forward(err)))
+		}
+	}
+}
+
+
+func testiter2(t *testing.T, s Storer) {
+	err := s.Tx(true, func(tx Transaction) error {
+		var err error
+		out := make(rand.StringPermutation, len(rand.LowerCase))
+		err = rand.RandomPermutation(rand.StringPermutation(rand.LowerCase), out, "go")
+		if err != nil {
+			return nil
+		}
+		for i, key := range out {
+			err = tx.Put(key, &TestStruct{I:i, Key:key})
+			if err != nil {
+				return err
+			}
+		}
+		c := tx.Cursor()
+		prev, _ := c.First()
+		for k, _ := c.First(); k != ""; k, _ = c.Next() {
+			if k < prev {
+				t.Logf("not in alphabetic sequence %v >= %v", prev, k)
+				t.Fail()
+			}
+			prev = k
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(e.Trace(e.Forward(err)))
+	}
+}
+
+func dropeverthing(t *testing.T, s Storer) {
+	t.Log("Drop!!!")
+	err := s.Drop()
+	if err != nil {
+		t.Fatal(e.Trace(e.Forward(err)))
 	}
 }

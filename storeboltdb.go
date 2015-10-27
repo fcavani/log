@@ -71,12 +71,18 @@ type BoltDb struct {
 	bucket string
 	enc Encoder
 	dec Decoder
+	path string
+	mode os.FileMode
+	options *bolt.Options
 }
 
 func NewBoltDb(bucket, path string, mode os.FileMode, options *bolt.Options, enc Encoder, dec Decoder) (Storer, error) {
 	var err error
 	b := new(BoltDb)
 	b.bucket = bucket
+	b.path = path
+	b.mode = mode
+	b.options = options
 	b.enc = enc
 	b.dec = dec
 	b.db, err = bolt.Open(path, mode, options)
@@ -308,5 +314,16 @@ func (db *BoltDb) Tx(write bool, f func(tx Transaction) error) error {
 		}
 	}
 	return nil
+}
 
+func (db *BoltDb) Drop() error {
+	err := db.db.Close()
+	if err != nil {
+		return e.Forward(err)
+	}
+	db.db, err = bolt.Open(db.path, db.mode, db.options)
+	if err != nil {
+		return e.New(err)
+	}
+	return nil
 }

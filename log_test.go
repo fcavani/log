@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 	"runtime"
 
 	"github.com/Sirupsen/logrus"
@@ -190,7 +191,7 @@ func TestDebug(t *testing.T) {
 	Log = New(multi, true).Domain("test").Tag("tag1")
 
 	Log.Println("teste debug info")
-	test(t, buf, "test", "log/log_test.go:192", "teste debug info")
+	test(t, buf, "test", "log/log_test.go:193", "teste debug info")
 }
 
 func TestMultiLine(t *testing.T) {
@@ -329,9 +330,9 @@ func BenchmarkLogFileBuffer(b *testing.B) {
 
 	back := NewOutBuffer(
 		NewWriter(file).F(DefFormatter),
-		5000,
+		b.N/2,
 	)
-	defer back.(*Outbuffer).Close()
+	defer back.(*OutBuffer).Close()
 
 	logger := New(back, false).Domain("test")
 
@@ -396,7 +397,7 @@ func BenchmarkBoltDbBuffer(b *testing.B) {
 	logger := New(
 		NewOutBuffer(
 			NewGeneric(bolt).F(DefFormatter),
-			5000,
+			b.N/2,
 		),
 		false,
 	).Domain("test")
@@ -404,6 +405,50 @@ func BenchmarkBoltDbBuffer(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		logger.Print(msg)
 		b.SetBytes(l)
+	}
+}
+
+func BenchmarkMongoDb(b *testing.B) {
+	mongodb, err := NewMongoDb("mongodb://localhost/test", "test", nil, Log, 30 * time.Second)
+	if err != nil {
+		b.Error(e.Trace(e.Forward(err)))
+	}
+	logger := New(
+		NewGeneric(mongodb).F(DefFormatter),
+		false,
+	).Domain("test")
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logger.Print(msg)
+		b.SetBytes(l)
+	}
+}
+
+func BenchmarkMongoDbBuffer(b *testing.B) {
+	mongodb, err := NewMongoDb("mongodb://localhost/test", "test", nil, Log, 30 * time.Second)
+	if err != nil {
+		b.Error(e.Trace(e.Forward(err)))
+	}
+	err = mongodb.Drop()
+	if err != nil {
+		b.Error(e.Trace(e.Forward(err)))
+	}
+	logger := New(
+		NewOutBuffer(
+			NewGeneric(mongodb).F(DefFormatter),
+			b.N/2,
+		),
+		false,
+	).Domain("test")
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logger.Print(msg)
+		b.SetBytes(l)
+	}
+	b.StopTimer()
+	err = mongodb.Drop()
+	if err != nil {
+		b.Error(e.Trace(e.Forward(err)))
 	}
 }
 

@@ -7,6 +7,7 @@ package log
 import (
 	"sort"
 	"sync"
+	//"strconv"
 
 	"github.com/fcavani/e"
 )
@@ -33,6 +34,7 @@ func searchString(idx []string, key string) int {
 type Map struct {
 	M   map[string]interface{}
 	Idx []string
+	size int
 	lck sync.RWMutex
 }
 
@@ -40,6 +42,7 @@ func NewMap(size int) (Storer, error) {
 	return &Map{
 		M:   make(map[string]interface{}, size),
 		Idx: make([]string, 0, size),
+		size: size,
 	}, nil
 }
 
@@ -234,5 +237,13 @@ func (m *Map) Tx(write bool, f func(tx Transaction) error) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (m *Map) Drop() error {
+	m.lck.Lock()
+	defer m.lck.Unlock()
+	m.M = make(map[string]interface{}, m.size)
+	m.Idx = make([]string, 0, m.size)
 	return nil
 }

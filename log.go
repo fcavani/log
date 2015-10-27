@@ -42,7 +42,7 @@ func init() {
 }
 
 type log struct {
-	Timestamp time.Time  `log:"date"`
+	Timestamp time.Time  `bson:"key",log:"date"`
 	Priority  Level      `log:"level"`
 	Labels    *tags.Tags `log:"tags",def:"no tags"`
 	Msg       string     `log:"msg"`

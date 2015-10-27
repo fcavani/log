@@ -277,13 +277,13 @@ type Generic struct {
 	s       Storer
 	chclose chan chan struct{}
 	o       *other
-	lck     sync.Mutex
 }
 
 func NewGeneric(s Storer) LogBackend {
-	return &Generic{
+	g := &Generic{
 		s: s,
 	}
+	return g
 }
 
 func (g *Generic) F(f Formatter) LogBackend {
@@ -296,8 +296,6 @@ func (g *Generic) GetF() Formatter {
 }
 
 func (g *Generic) Commit(entry Entry) {
-	g.lck.Lock()
-	defer g.lck.Unlock()
 	var err error
 	defer func() {
 		if err != nil {
