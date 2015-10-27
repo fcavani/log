@@ -1,7 +1,10 @@
 language: go
-go: 
+go:
  - release
  - tip
+
+ services:
+  - mongodb
 
 script:
  - go test -v -timeout=15s ./...
