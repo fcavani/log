@@ -5,13 +5,13 @@
 package log
 
 import (
+	"encoding/gob"
 	"fmt"
 	"os"
-	"time"
 	"runtime"
-	"strings"
 	"strconv"
-	"encoding/gob"
+	"strings"
+	"time"
 
 	"github.com/fcavani/e"
 	"github.com/fcavani/tags"
@@ -47,11 +47,11 @@ type log struct {
 	Labels    *tags.Tags `log:"tags",def:"no tags"`
 	Msg       string     `log:"msg"`
 	Dom       string     `log:"domain"`
-	E       error
+	E         error
 	f         Formatter
 	store     LogBackend
-	Debug	  bool
-	File	  string	`log:"file"`
+	Debug     bool
+	File      string `log:"file"`
 }
 
 func init() {
@@ -191,117 +191,130 @@ func (l *log) Formatter(f Formatter) {
 }
 
 func (l *log) Print(v ...interface{}) {
-	l.Msg = fmt.Sprint(v...)
-	l.Timestamp = time.Now()
-	l.debugInfo()
-	l.store.Commit(l)
+	n := l.clone()
+	n.Msg = fmt.Sprint(v...)
+	n.Timestamp = time.Now()
+	n.debugInfo()
+	n.store.Commit(n)
 }
 
 func (l *log) Printf(f string, v ...interface{}) {
-	l.Msg = fmt.Sprintf(f, v...)
-	l.Timestamp = time.Now()
-	l.debugInfo()
-	l.store.Commit(l)
+	n := l.clone()
+	n.Msg = fmt.Sprintf(f, v...)
+	n.Timestamp = time.Now()
+	n.debugInfo()
+	n.store.Commit(n)
 }
 
 func (l *log) Println(v ...interface{}) {
-	l.Msg = fmt.Sprintln(v...)
-	l.Timestamp = time.Now()
-	l.debugInfo()
-	l.store.Commit(l)
+	n := l.clone()
+	n.Msg = fmt.Sprintln(v...)
+	n.Timestamp = time.Now()
+	n.debugInfo()
+	n.store.Commit(n)
 }
 
 func (l *log) Fatal(v ...interface{}) {
-	l.Priority = FatalPrio
-	l.Msg = fmt.Sprint(v...)
-	l.Timestamp = time.Now()
-	l.debugInfo()
-	l.store.Commit(l)
+	n := l.clone()
+	n.Priority = FatalPrio
+	n.Msg = fmt.Sprint(v...)
+	n.Timestamp = time.Now()
+	n.debugInfo()
+	n.store.Commit(n)
 	os.Exit(1)
 }
 
 func (l *log) Fatalf(f string, v ...interface{}) {
-	l.Priority = FatalPrio
-	l.Msg = fmt.Sprintf(f, v...)
-	l.Timestamp = time.Now()
-	l.debugInfo()
-	l.store.Commit(l)
+	n := l.clone()
+	n.Priority = FatalPrio
+	n.Msg = fmt.Sprintf(f, v...)
+	n.Timestamp = time.Now()
+	n.debugInfo()
+	n.store.Commit(n)
 	os.Exit(1)
 }
 
 func (l *log) Fatalln(v ...interface{}) {
-	l.Priority = FatalPrio
-	l.Msg = fmt.Sprintln(v...)
-	l.Timestamp = time.Now()
-	l.debugInfo()
-	l.store.Commit(l)
+	n := l.clone()
+	n.Priority = FatalPrio
+	n.Msg = fmt.Sprintln(v...)
+	n.Timestamp = time.Now()
+	n.debugInfo()
+	n.store.Commit(n)
 	os.Exit(1)
 }
 
 func (l *log) Panic(v ...interface{}) {
-	l.Priority = PanicPrio
-	l.Msg = fmt.Sprint(v...)
-	l.Timestamp = time.Now()
-	l.debugInfo()
-	l.store.Commit(l)
-	panic(l.Msg)
+	n := l.clone()
+	n.Priority = PanicPrio
+	n.Msg = fmt.Sprint(v...)
+	n.Timestamp = time.Now()
+	n.debugInfo()
+	n.store.Commit(n)
+	panic(n.Msg)
 }
 
 func (l *log) Panicf(f string, v ...interface{}) {
-	l.Priority = PanicPrio
-	l.Msg = fmt.Sprintf(f, v...)
-	l.Timestamp = time.Now()
-	l.debugInfo()
-	l.store.Commit(l)
-	panic(l.Msg)
+	n := l.clone()
+	n.Priority = PanicPrio
+	n.Msg = fmt.Sprintf(f, v...)
+	n.Timestamp = time.Now()
+	n.debugInfo()
+	n.store.Commit(n)
+	panic(n.Msg)
 }
 
 func (l *log) Panicln(v ...interface{}) {
-	l.Priority = PanicPrio
-	l.Msg = fmt.Sprintln(v...)
-	l.Timestamp = time.Now()
-	l.debugInfo()
-	l.store.Commit(l)
-	panic(l.Msg)
+	n := l.clone()
+	n.Priority = PanicPrio
+	n.Msg = fmt.Sprintln(v...)
+	n.Timestamp = time.Now()
+	n.debugInfo()
+	n.store.Commit(n)
+	panic(n.Msg)
 }
 
 func (l *log) Error(v ...interface{}) {
-	l.Priority = ErrorPrio
-	l.Msg = fmt.Sprint(v...)
-	l.Timestamp = time.Now()
-	l.debugInfo()
-	l.store.Commit(l)
+	n := l.clone()
+	n.Priority = ErrorPrio
+	n.Msg = fmt.Sprint(v...)
+	n.Timestamp = time.Now()
+	n.debugInfo()
+	n.store.Commit(n)
 }
 
 func (l *log) Errorf(f string, v ...interface{}) {
-	l.Priority = ErrorPrio
-	l.Msg = fmt.Sprintf(f, v...)
-	l.Timestamp = time.Now()
-	l.debugInfo()
-	l.store.Commit(l)
+	n := l.clone()
+	n.Priority = ErrorPrio
+	n.Msg = fmt.Sprintf(f, v...)
+	n.Timestamp = time.Now()
+	n.debugInfo()
+	n.store.Commit(n)
 }
 
 func (l *log) Errorln(v ...interface{}) {
-	l.Priority = ErrorPrio
-	l.Msg = fmt.Sprintln(v...)
-	l.Timestamp = time.Now()
-	l.debugInfo()
-	l.store.Commit(l)
+	n := l.clone()
+	n.Priority = ErrorPrio
+	n.Msg = fmt.Sprintln(v...)
+	n.Timestamp = time.Now()
+	n.debugInfo()
+	n.store.Commit(n)
 }
 
 func (l *log) GoPanic(r interface{}, stack []byte, cont bool) {
-	l.Priority = PanicPrio
-	l.Timestamp = time.Now()
+	n := l.clone()
+	n.Priority = PanicPrio
+	n.Timestamp = time.Now()
 	switch v := r.(type) {
 	case string:
-		l.Msg = v + "\n"
+		n.Msg = v + "\n"
 	case fmt.Stringer:
-		l.Msg = v.String() + "\n"
+		n.Msg = v.String() + "\n"
 	default:
-		l.Msg = fmt.Sprintln(r)
+		n.Msg = fmt.Sprintln(r)
 	}
-	l.Msg += "\n" + string(stack)
-	l.store.Commit(l)
+	n.Msg += "\n" + string(stack)
+	n.store.Commit(n)
 	if !cont {
 		os.Exit(1)
 	}
