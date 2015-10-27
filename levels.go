@@ -4,6 +4,8 @@
 
 package log
 
+import "github.com/fcavani/e"
+
 type Level uint8
 
 const (
@@ -37,5 +39,28 @@ func (l Level) String() string {
 		return "no priority"
 	default:
 		panic("this isn't a priority")
+	}
+}
+
+func ParseLevel(level string) (Level, error) {
+	switch level {
+	case "protocol":
+		return ProtoPrio, nil
+	case "debug":
+		return DebugPrio, nil
+	case "info":
+		return InfoPrio, nil
+	case "warning":
+		return WarnPrio, nil
+	case "error":
+		return ErrorPrio, nil
+	case "fatal":
+		return FatalPrio, nil
+	case "panic":
+		return PanicPrio, nil
+	case "no priority":
+		return NoPrio, nil
+	default:
+		return NoPrio, e.New("invalid priority")
 	}
 }
