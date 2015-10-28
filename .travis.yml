@@ -3,6 +3,10 @@ go:
  - release
  - tip
 
+matrix:
+  allow_failures:
+    - go: tip
+
  services:
   - mongodb
 
