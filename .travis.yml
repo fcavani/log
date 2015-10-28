@@ -2,10 +2,10 @@ language: go
 go:
  - release
  - tip
+services:
+  - mongodb
 matrix:
   allow_failures:
     - go: tip
- services:
-  - mongodb
 script:
- - go test -v -timeout=15s ./...
+  - go test -v -timeout=60s ./...
