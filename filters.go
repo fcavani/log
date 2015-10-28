@@ -18,6 +18,7 @@ type filter struct {
 	r Ruler
 }
 
+// Filter creates a new filter with rules r for l backend.
 func Filter(l LogBackend, r Ruler) LogBackend {
 	return &filter{
 		LogBackend: l,
@@ -36,6 +37,7 @@ func (f *filter) F(formatter Formatter) LogBackend {
 	return f
 }
 
+// Operation defines one operator for the rules.
 type Operation uint8
 
 const (

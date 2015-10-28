@@ -6,11 +6,11 @@ package log
 
 import (
 	"bytes"
+	"encoding/gob"
 	"fmt"
 	"reflect"
 	"strconv"
 	"time"
-	"encoding/gob"
 
 	"github.com/fcavani/e"
 	"github.com/fcavani/utilitybelt/deepcopy"
@@ -40,7 +40,7 @@ func mkindex(entry Entry) (m map[string]struct {
 		def := f.Tag.Get("def")
 
 		m[tag] = struct {
-			I  int
+			I   int
 			Def string
 		}{i, def}
 	}
@@ -63,7 +63,7 @@ func strinter(val reflect.Value) (str string, err error) {
 	if inter == nil {
 		return "", e.New("interface is nil")
 	}
-	switch i := inter.(type){
+	switch i := inter.(type) {
 	case time.Time:
 		str = i.Format(TimeDateFormat)
 		return
@@ -97,12 +97,19 @@ func stringfy(val reflect.Value) (str string) {
 	return
 }
 
+// StdFormatter is a formatter for the log data. The fild in Entry
+// are match with the fields in Tmpl, the tags in Entry are considered.
 type StdFormatter struct {
+	// Delim: every fild in Tmpl are preceded by it.
 	Delim []byte
-	Tmpl  []byte
-	E     Entry
-	Map   map[string]interface{}
-	Idx   map[string]struct {
+	// Tmpl is the template and are compose by deliminator fallowed by labels
+	Tmpl []byte
+	// E is the Entry. This fild are only used for struct analasy of E.
+	E Entry
+	// Map holds the replacements for labels that aren't found in E.
+	Map map[string]interface{}
+	// Idx are the index of the fild. Don't change.
+	Idx map[string]struct {
 		I   int
 		Def string
 	}
@@ -112,6 +119,7 @@ func init() {
 	gob.Register(&StdFormatter{})
 }
 
+// NewStdFormatter crete a new formatter.
 func NewStdFormatter(delim, tmpl string, entry Entry, values map[string]interface{}) (Formatter, error) {
 	if delim == "" {
 		return nil, e.New("invalid delimitator")
@@ -202,10 +210,10 @@ func (s StdFormatter) Format(entry Entry) (out []byte, err error) {
 
 		out = append(out[:start], append(vb, out[end:]...)...)
 	}
-	
+
 	scape := scapemark(s.Delim)
 	out = bytes.Replace(out, scape, s.Delim, -1)
-	out = bytes.Replace(out, []byte{' ',' '}, []byte{' '}, -1)
+	out = bytes.Replace(out, []byte{' ', ' '}, []byte{' '}, -1)
 	return
 }
 
