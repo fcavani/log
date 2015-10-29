@@ -4,3 +4,62 @@
 
 Log package is much like the go log package. But it have a fill more tricks, like backends and filters.
 
+#Considerations about speed
+
+Below is the table with the go benchmark for some loggers packages
+([PureGolog](https://golang.org/pkg/log/), [GoLogging](https://github.com/op/go-logging), [Logrus](https://github.com/Sirupsen/logrus))
+and for some cases with different backends of this package.
+All three loggers above was set to log to /dev/null, and use the most simple
+configuration that I can find, thus they will have good performance, with is
+the case for the go log, it is the most simple and the base line for the others.
+In some cases this logger can win Logrus, the slower logger between the
+other two, but I doubt that StoreMap, it stores
+all logged data in memory, will have practical use by anyone.
+
+'''
+BenchmarkPureGolog-4    	 1000000	      1465 ns/op	  12.28 MB/s
+BenchmarkGoLogging-4    	 1000000	      2235 ns/op	   8.05 MB/s
+BenchmarkLogrus-4       	  300000	      5167 ns/op	   3.48 MB/s
+BenchmarkGolog-4        	  200000	      6483 ns/op	   2.78 MB/s
+BenchmarkLogStderr-4    	  200000	      5641 ns/op	   3.19 MB/s
+BenchmarkLogFile-4      	  200000	      8276 ns/op	   2.17 MB/s
+BenchmarkLogFileBuffer-4	  300000	      4838 ns/op	   3.72 MB/s
+BenchmarkStoreMap-4     	  500000	      3749 ns/op	   4.80 MB/s
+BenchmarkBoltDb-4       	    3000	    552564 ns/op	   0.03 MB/s
+BenchmarkBoltDbBuffer-4 	    5000	    270518 ns/op	   0.07 MB/s
+BenchmarkMongoDb-4      	    2000	   1052129 ns/op	   0.02 MB/s
+BenchmarkMongoDbBuffer-4	     100	  11864291 ns/op	   0.00 MB/s
+BenchmarkLogOuterNull-4	    200000	      8006 ns/op	   2.25 MB/s
+BenchmarkLogOuterFile-4	    100000	     15351 ns/op	   1.17 MB/s
+'''
+
+LogFileBuffer is interesting if you can setup a buffer larger enough to
+accommodate all income data without saturate the buffer. In this tests the
+buffer was set to half the size of b.N, the number of runs in the second
+column. Because this the buffer is relevant until it is full in the half
+of the test than the backend operate normally, without buffer, to the end
+of the test. Thus we have in the third column one number that shows the
+buffer working but shows too the backend working without buffer.
+
+Using buffers in log application create a latency between the time the
+event occurs and the time that someone or some log analyser will see the
+event, for that reason it is not suitable for real time application. But for small
+applications, that latency not will compromise the operation, even the
+file log without buffer will work.
+
+For the database (BoltDb and MongoDb), I don't have information if this numbers
+correspond to the reality. In the case of MongoDb with buffers the number of
+runs is too small that the buffer size become a problem and make the backend
+work slower.
+
+The last two rows are for cases where you want to plug one logger to this one.
+I use this to redirect the [yamux](https://github.com/hashicorp/yamux)
+logger to my logger.
+
+This logger can offer much customizations, you can make a new entry, a new formatter
+and backends. You can mix all backends with all filters and make a great custom
+logger easily, but its slow. :) It's the first version too.
+
+#Backends
+
+#Filters
