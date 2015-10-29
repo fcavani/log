@@ -8,16 +8,16 @@ import (
 	"bytes"
 	golog "log"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
-	"runtime"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/fcavani/e"
 	"github.com/fcavani/rand"
-	"github.com/op/go-logging"
 	"github.com/fcavani/types"
+	"github.com/op/go-logging"
 )
 
 func test(t *testing.T, buf *bytes.Buffer, ss ...string) {
@@ -170,7 +170,7 @@ func TestPanicHandler(t *testing.T) {
 	buf := bytes.NewBuffer([]byte{})
 	multi := NewMulti(NewWriter(buf), DefFormatter, NewWriter(os.Stdout), DefFormatter)
 	Log = New(multi, false).Domain("test")
-	
+
 	defer func() {
 		r := recover()
 		if r != nil {
@@ -181,7 +181,7 @@ func TestPanicHandler(t *testing.T) {
 		}
 		test(t, buf, "test", "test panic logging")
 	}()
-	
+
 	panic("test panic logging")
 }
 
@@ -206,7 +206,7 @@ func TestMultiLine(t *testing.T) {
 	buf := bytes.NewBuffer([]byte{})
 	multi := NewMulti(NewWriter(buf), formatter, NewWriter(os.Stdout), formatter)
 	Log = New(multi, true).Domain("test").Tag("tag1")
-	
+
 	Log.Println("na outra linha")
 	test(t, buf, "test", "test", "tag1")
 	test(t, buf, "na outra linha")
@@ -273,13 +273,9 @@ func BenchmarkGolog(b *testing.B) {
 	}
 }
 
-func BenchmarkLogStdout(b *testing.B) {
-	file, err := os.OpenFile("/dev/null", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0600)
-	if err != nil {
-		b.Error(e.Trace(e.Forward(err)))
-	}
+func BenchmarkLogStderr(b *testing.B) {
 	logger := New(
-		NewWriter(file).F(DefFormatter),
+		NewWriter(os.Stderr).F(DefFormatter),
 		false,
 	).Domain("test")
 	b.ResetTimer()
@@ -409,7 +405,7 @@ func BenchmarkBoltDbBuffer(b *testing.B) {
 }
 
 func BenchmarkMongoDb(b *testing.B) {
-	mongodb, err := NewMongoDb("mongodb://localhost/test", "test", nil, Log, 30 * time.Second)
+	mongodb, err := NewMongoDb("mongodb://localhost/test", "test", nil, Log, 30*time.Second)
 	if err != nil {
 		b.Error(e.Trace(e.Forward(err)))
 	}
@@ -425,7 +421,7 @@ func BenchmarkMongoDb(b *testing.B) {
 }
 
 func BenchmarkMongoDbBuffer(b *testing.B) {
-	mongodb, err := NewMongoDb("mongodb://localhost/test", "test", nil, Log, 30 * time.Second)
+	mongodb, err := NewMongoDb("mongodb://localhost/test", "test", nil, Log, 30*time.Second)
 	if err != nil {
 		b.Error(e.Trace(e.Forward(err)))
 	}
@@ -452,23 +448,23 @@ func BenchmarkMongoDbBuffer(b *testing.B) {
 	}
 }
 
-func BenchmarkLogOutterNull(b *testing.B) {
+func BenchmarkLogOuterNull(b *testing.B) {
 	buf := bytes.NewBuffer([]byte{})
 	//backend := NewMulti(NewWriter(buf), DefFormatter, NewWriter(os.Stdout), DefFormatter)
 	backend := NewWriter(buf).F(DefFormatter)
-	olog, ok := backend.(OtherLogger)
+	olog, ok := backend.(OuterLogger)
 	if !ok {
 		return
 	}
-	w := olog.OtherLog("tag")
+	w := olog.OuterLog("tag")
 	defer olog.Close()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		n, err := w.Write([]byte(msg+"\n"))
+		n, err := w.Write([]byte(msg + "\n"))
 		if err != nil {
 			b.Error(e.Trace(e.Forward(err)))
 		}
-		if int64(n) != l + 1 {
+		if int64(n) != l+1 {
 			b.Error("write failed", n, l)
 		}
 		// b.StopTimer()
@@ -479,7 +475,7 @@ func BenchmarkLogOutterNull(b *testing.B) {
 	}
 }
 
-func BenchmarkLogOutterFile(b *testing.B) {
+func BenchmarkLogOuterFile(b *testing.B) {
 	name, err := rand.FileName("BenchmarkLogFile", ".log", 10)
 	if err != nil {
 		b.Error(e.Trace(e.Forward(err)))
@@ -491,21 +487,21 @@ func BenchmarkLogOutterFile(b *testing.B) {
 	}
 	defer os.Remove(name)
 	defer file.Close()
-	
+
 	backend := NewWriter(file).F(DefFormatter)
-	olog, ok := backend.(OtherLogger)
+	olog, ok := backend.(OuterLogger)
 	if !ok {
 		return
 	}
-	w := olog.OtherLog("tag")
+	w := olog.OuterLog("tag")
 	defer olog.Close()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		n, err := w.Write([]byte(msg+"\n"))
+		n, err := w.Write([]byte(msg + "\n"))
 		if err != nil {
 			b.Error(e.Trace(e.Forward(err)))
 		}
-		if int64(n) != l + 1 {
+		if int64(n) != l+1 {
 			b.Error("write failed", n, l)
 		}
 		b.SetBytes(l)

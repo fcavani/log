@@ -7,10 +7,10 @@ package log
 import (
 	"bytes"
 	golog "log"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
-	"os"
 
 	"github.com/fcavani/e"
 )
@@ -61,7 +61,7 @@ func testLogBackend(t *testing.T, pers testPers) {
 	if !reflect.DeepEqual(DefFormatter, f) {
 		t.Fatal("miracle! not equal")
 	}
-	
+
 	back := NewMulti(pers.backend, DefFormatter, NewWriter(os.Stdout), DefFormatter)
 	DefFormatter.NewEntry(back).Print(pers.result)
 	//DefFormatter.NewEntry(pers.backend).Println(pers.result)
@@ -72,11 +72,11 @@ func testLogBackend(t *testing.T, pers testPers) {
 		chkresult(t, pers.store, pers.result)
 	}
 
-	olog, ok := pers.backend.(OtherLogger)
+	olog, ok := pers.backend.(OuterLogger)
 	if !ok {
 		return
 	}
-	w := olog.OtherLog("tag")
+	w := olog.OuterLog("tag")
 	defer olog.Close()
 	str := "test outer logger\n"
 	n, err := w.Write([]byte(str))

@@ -59,12 +59,12 @@ func NewSendToLogger(logger *golog.Logger) LogBackend {
 	}
 }
 
-type other struct {
+type outer struct {
 	ch  chan []byte
 	buf []byte
 }
 
-func (o *other) Write(p []byte) (n int, err error) {
+func (o *outer) Write(p []byte) (n int, err error) {
 	o.buf = append(o.buf, p...)
 	i := bytes.Index(o.buf, []byte{'\n'})
 	if i == -1 {
@@ -81,9 +81,9 @@ func (o *other) Write(p []byte) (n int, err error) {
 
 // MultiLog copy the log entry to multiples backends.
 type MultiLog struct {
-	mp []LogBackend
+	mp      []LogBackend
 	chclose chan chan struct{}
-	o       *other
+	o       *outer
 }
 
 //NewMulti creates a MultiLog
@@ -127,9 +127,9 @@ func (mp *MultiLog) Commit(entry Entry) {
 	}
 }
 
-// OtherLog is like others OtherLogs but the nem entry is
+// outerLog is like outers outerLogs but the nem entry is
 // created from the first BackLog in the list.
-func (mp *MultiLog) OtherLog(tag string) io.Writer {
+func (mp *MultiLog) OuterLog(tag string) io.Writer {
 	if mp.o != nil {
 		return mp.o
 	}
@@ -151,7 +151,7 @@ func (mp *MultiLog) OtherLog(tag string) io.Writer {
 			}
 		}
 	}()
-	mp.o = &other{
+	mp.o = &outer{
 		ch:  ch,
 		buf: make([]byte, 0),
 	}
@@ -169,13 +169,12 @@ func (mp *MultiLog) Close() error {
 	return nil
 }
 
-
 // Writer log to an io.Writer
 type Writer struct {
 	f       Formatter
 	w       io.Writer
 	chclose chan chan struct{}
-	o       *other
+	o       *outer
 	lck     sync.Mutex
 }
 
@@ -218,12 +217,12 @@ func (w *Writer) Commit(entry Entry) {
 	buf := entry.Bytes()
 	l := len(buf)
 	if buf[l-1] != '\n' {
-		if cap(buf) < l + 1 {
-			tmp := make([]byte, l + 1)
+		if cap(buf) < l+1 {
+			tmp := make([]byte, l+1)
 			copy(tmp, buf)
 			buf = tmp
 		}
-		buf = buf[0:l+1]
+		buf = buf[0 : l+1]
 		buf[len(buf)-1] = '\n'
 	}
 	var n int
@@ -236,7 +235,7 @@ func (w *Writer) Commit(entry Entry) {
 	}
 }
 
-func (w *Writer) OtherLog(tag string) io.Writer {
+func (w *Writer) OuterLog(tag string) io.Writer {
 	if w.o != nil {
 		return w.o
 	}
@@ -254,7 +253,7 @@ func (w *Writer) OtherLog(tag string) io.Writer {
 			}
 		}
 	}()
-	w.o = &other{
+	w.o = &outer{
 		ch:  ch,
 		buf: make([]byte, 0),
 	}
@@ -276,7 +275,7 @@ type Generic struct {
 	f       Formatter
 	s       Storer
 	chclose chan chan struct{}
-	o       *other
+	o       *outer
 }
 
 func NewGeneric(s Storer) LogBackend {
@@ -320,7 +319,7 @@ func (g *Generic) Commit(entry Entry) {
 	}
 }
 
-func (g *Generic) OtherLog(tag string) io.Writer {
+func (g *Generic) OuterLog(tag string) io.Writer {
 	if g.o != nil {
 		return g.o
 	}
@@ -338,7 +337,7 @@ func (g *Generic) OtherLog(tag string) io.Writer {
 			}
 		}
 	}()
-	g.o = &other{
+	g.o = &outer{
 		ch:  ch,
 		buf: make([]byte, 0),
 	}
