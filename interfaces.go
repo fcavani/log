@@ -28,6 +28,7 @@ type Entry interface {
 	Err() error
 	// String return the formated log
 	String() string
+	// Bytes return the formated log in bytes
 	Bytes() []byte
 	// Formatter sets the formater for that entry
 	Formatter(f Formatter)
@@ -104,7 +105,7 @@ type Levels interface {
 
 type Tagger interface {
 	// Tag attach a tag
-	Tag(tag string) Logger
+	Tag(tags ...string) Logger
 }
 type Storage interface {
 	// Store give access to the persistence storage

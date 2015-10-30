@@ -44,7 +44,7 @@ func init() {
 type log struct {
 	Timestamp time.Time  `bson:"key" log:"date"`
 	Priority  Level      `log:"level"`
-	Labels    *tags.Tags `log:"tags",def:"no tags"`
+	Labels    *tags.Tags `log:"tags" def:"no tags"`
 	Msg       string     `log:"msg"`
 	Dom       string     `log:"domain"`
 	E         error
@@ -123,9 +123,9 @@ func (l *log) Message() string {
 	return l.Msg
 }
 
-func (l *log) Tag(tag string) Logger {
+func (l *log) Tag(tags ...string) Logger {
 	n := l.clone()
-	n.E = e.Forward(n.Labels.Add(tag))
+	n.E = e.Forward(n.Labels.MergeFromStringSlice(tags))
 	l.error(n.E)
 	return n
 }
@@ -450,8 +450,8 @@ func PanicLevel() Logger {
 	return Log.PanicLevel()
 }
 
-func Tag(tag string) Logger {
-	return Log.Tag(tag)
+func Tag(tags ...string) Logger {
+	return Log.Tag(tags...)
 }
 
 func GoPanic(r interface{}, stack []byte, cont bool) {
