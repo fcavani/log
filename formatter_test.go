@@ -60,6 +60,14 @@ func (et *entryTest) Formatter(f Formatter) {
 
 }
 
+func (et *entryTest) SetLevel(level Level) Logger {
+	return nil
+}
+
+func (et *entryTest) Sorter(r Ruler) Logger {
+	return nil
+}
+
 type entryTest2 struct {
 	Tag string `log:"tag"`
 }
@@ -104,13 +112,21 @@ func (et *entryTest2) Formatter(f Formatter) {
 
 }
 
+func (et *entryTest2) SetLevel(level Level) Logger {
+	return nil
+}
+
+func (et *entryTest2) Sorter(r Ruler) Logger {
+	return nil
+}
+
 type teststruct struct {
 	raw    string
 	entry  *entryTest
 	result string
 }
 
-var tests []teststruct = []teststruct{
+var tests = []teststruct{
 	{"::tag", &entryTest{Tag: "flor"}, "flor"},
 	{"::tag de outubro", &entryTest{Tag: "flor"}, "flor de outubro"},
 	{"colhi a ::tag", &entryTest{Tag: "flor"}, "colhi a flor"},

@@ -4,19 +4,17 @@
 
 package log
 
-import (
-)
-
 type OutBuffer struct {
-	bak LogBackend
-	ch chan Entry
+	bak     LogBackend
+	ch      chan Entry
 	chclose chan chan struct{}
+	r       Ruler
 }
 
 func NewOutBuffer(bak LogBackend, size int) LogBackend {
 	o := &OutBuffer{
-		bak: bak,
-		ch: make(chan Entry, size),
+		bak:     bak,
+		ch:      make(chan Entry, size),
 		chclose: make(chan chan struct{}),
 	}
 	go func() {
@@ -42,7 +40,15 @@ func (o *OutBuffer) GetF() Formatter {
 	return o.bak.GetF()
 }
 
+func (o *OutBuffer) Filter(r Ruler) LogBackend {
+	o.r = r
+	return o
+}
+
 func (o *OutBuffer) Commit(entry Entry) {
+	if o.r != nil && !o.r.Result(entry) {
+		return
+	}
 	o.ch <- entry
 }
 
@@ -51,4 +57,3 @@ func (o *OutBuffer) Close() {
 	o.chclose <- ch
 	<-ch
 }
-

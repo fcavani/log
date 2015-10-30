@@ -67,6 +67,14 @@ func (t *testEntry) Formatter(f Formatter) {
 	return
 }
 
+func (t *testEntry) SetLevel(level Level) Logger {
+	return nil
+}
+
+func (t *testEntry) Sorter(r Ruler) Logger {
+	return nil
+}
+
 func TestInvalidOperation(t *testing.T) {
 	defer func() {
 		r := recover()

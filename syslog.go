@@ -11,6 +11,7 @@ import (
 // Syslog sends all messages to syslog.
 type Syslog struct {
 	w *syslog.Writer
+	r Ruler
 }
 
 func NewSyslog(w *syslog.Writer) LogBackend {
@@ -29,7 +30,15 @@ func (s *Syslog) GetF() Formatter {
 	return nil
 }
 
+func (s *Syslog) Filter(r Ruler) LogBackend {
+	s.r = r
+	return s
+}
+
 func (s *Syslog) Commit(entry Entry) {
+	if s.r != nil && !s.r.Result(entry) {
+		return
+	}
 	switch entry.Level() {
 	case ProtoPrio:
 		err := s.w.Debug(entry.Message())

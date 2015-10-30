@@ -73,6 +73,27 @@ func TestStdLog(t *testing.T) {
 	test(t, buf, "ploc")
 }
 
+func TestLevels(t *testing.T) {
+	buf := bytes.NewBuffer([]byte{})
+	l := golog.New(buf, "", golog.LstdFlags)
+	multi := NewMulti(NewSendToLogger(nil), DefFormatter, NewSendToLogger(l), DefFormatter)
+	Log = New(multi, false).Domain("test")
+
+	Log.SetLevel(DebugPrio)
+
+	Println("oi")
+	test(t, buf, "oi")
+
+	ProtoLevel().Println("blá")
+	err := testerr(buf, "blá")
+	if err != nil && !e.Contains(err, "log didn't log") {
+		t.Fatal(e.Trace(e.Forward(err)))
+	} else if err == nil {
+		t.Fatal("nil error")
+	}
+
+}
+
 func TestPanic(t *testing.T) {
 	buf := bytes.NewBuffer([]byte{})
 	defer func() {
@@ -191,7 +212,7 @@ func TestDebug(t *testing.T) {
 	Log = New(multi, true).Domain("test").Tag("tag1")
 
 	Log.Println("teste debug info")
-	test(t, buf, "test", "log/log_test.go:193", "teste debug info")
+	test(t, buf, "test", "log/log_test.go:214", "teste debug info")
 }
 
 func TestMultiLine(t *testing.T) {

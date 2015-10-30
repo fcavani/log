@@ -9,14 +9,14 @@ import "github.com/fcavani/e"
 type Level uint8
 
 const (
-	ProtoPrio Level = iota
+	ProtoPrio Level = iota //More priority
 	DebugPrio
 	InfoPrio
 	WarnPrio
 	ErrorPrio
 	FatalPrio
 	PanicPrio
-	NoPrio
+	NoPrio //Less priority
 )
 
 func (l Level) String() string {

@@ -11,14 +11,14 @@ import (
 	"time"
 
 	"github.com/fcavani/e"
-	"github.com/fcavani/tags"
 	"github.com/fcavani/rand"
+	"github.com/fcavani/tags"
 	"github.com/fcavani/types"
 )
 
 type TestStruct struct {
 	Key string `bson:"key"`
-	I int
+	I   int
 }
 
 func (et *TestStruct) Date() time.Time {
@@ -61,10 +61,17 @@ func (et *TestStruct) Formatter(f Formatter) {
 
 }
 
+func (et *TestStruct) SetLevel(level Level) Logger {
+	return nil
+}
+
+func (et *TestStruct) Sorter(r Ruler) Logger {
+	return nil
+}
+
 func init() {
 	types.Insert(&TestStruct{})
 }
-
 
 type store struct {
 	Name  string
@@ -214,7 +221,7 @@ func readonly(t *testing.T, s Storer) {
 		}
 	}()
 	err := s.Tx(false, func(tx Transaction) error {
-		return tx.Put("none", &TestStruct{I:0, Key:"0"})
+		return tx.Put("none", &TestStruct{I: 0, Key: "0"})
 	})
 	if err != nil && !e.Equal(err, ErrReadOnly) {
 		t.Fatal(e.Trace(e.Forward(err)))
@@ -247,16 +254,16 @@ func put(t *testing.T, s Storer, num int) {
 		var err error
 		for i := 0; i < num; i++ {
 			key := strconv.Itoa(i)
-			err = tx.Put(key, &TestStruct{I:i, Key:key})
+			err = tx.Put(key, &TestStruct{I: i, Key: key})
 			if err != nil {
 				return err
 			}
 		}
-		err = tx.Put("3a", &TestStruct{I:3, Key:"3a"})
+		err = tx.Put("3a", &TestStruct{I: 3, Key: "3a"})
 		if err != nil {
 			return err
 		}
-		err = tx.Put("3a", &TestStruct{I:3, Key:"3a"})
+		err = tx.Put("3a", &TestStruct{I: 3, Key: "3a"})
 		if err != nil {
 			return err
 		}
@@ -352,7 +359,7 @@ func iter(t *testing.T, s Storer, num int) {
 		i := 1
 		kk, _ := c.First()
 		for k, _ := c.Next(); k != ""; k, _ = c.Next() {
-			if k <=  kk {
+			if k <= kk {
 				return e.New("retrieve wrong key %v %v", k, kk)
 			}
 			kk = k
@@ -438,7 +445,7 @@ func testsort(t *testing.T, s Storer) {
 			}
 			//t.Log(out)
 			for i, key := range out {
-				err = tx.Put(key, &TestStruct{I:i, Key:key})
+				err = tx.Put(key, &TestStruct{I: i, Key: key})
 				if err != nil {
 					return err
 				}
@@ -475,7 +482,6 @@ func testsort(t *testing.T, s Storer) {
 	}
 }
 
-
 func testiter2(t *testing.T, s Storer) {
 	err := s.Tx(true, func(tx Transaction) error {
 		var err error
@@ -485,7 +491,7 @@ func testiter2(t *testing.T, s Storer) {
 			return nil
 		}
 		for i, key := range out {
-			err = tx.Put(key, &TestStruct{I:i, Key:key})
+			err = tx.Put(key, &TestStruct{I: i, Key: key})
 			if err != nil {
 				return err
 			}

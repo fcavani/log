@@ -21,6 +21,7 @@ var DateFormat = time.RFC3339
 type SendToLogger struct {
 	f Formatter
 	*golog.Logger
+	r Ruler
 }
 
 func (s *SendToLogger) F(f Formatter) LogBackend {
@@ -32,6 +33,11 @@ func (s *SendToLogger) GetF() Formatter {
 	return s.f
 }
 
+func (s *SendToLogger) Filter(r Ruler) LogBackend {
+	s.r = r
+	return s
+}
+
 func (s *SendToLogger) Commit(entry Entry) {
 	var err error
 	defer func() {
@@ -41,6 +47,9 @@ func (s *SendToLogger) Commit(entry Entry) {
 	}()
 	if s.f == nil {
 		err = e.New("formater not set")
+		return
+	}
+	if s.r != nil && !s.r.Result(entry) {
 		return
 	}
 	entry.Formatter(s.f)
@@ -84,6 +93,7 @@ type MultiLog struct {
 	mp      []LogBackend
 	chclose chan chan struct{}
 	o       *outer
+	r       Ruler
 }
 
 //NewMulti creates a MultiLog
@@ -121,7 +131,15 @@ func (mp *MultiLog) GetF() Formatter {
 	return nil
 }
 
+func (mp *MultiLog) Filter(r Ruler) LogBackend {
+	mp.r = r
+	return mp
+}
+
 func (mp *MultiLog) Commit(entry Entry) {
+	if mp.r != nil && !mp.r.Result(entry) {
+		return
+	}
 	for _, p := range mp.mp {
 		p.Commit(entry)
 	}
@@ -176,6 +194,7 @@ type Writer struct {
 	chclose chan chan struct{}
 	o       *outer
 	lck     sync.Mutex
+	r       Ruler
 }
 
 // NewWriter creates a backend that log to w.
@@ -194,6 +213,11 @@ func (w *Writer) GetF() Formatter {
 	return w.f
 }
 
+func (w *Writer) Filter(r Ruler) LogBackend {
+	w.r = r
+	return w
+}
+
 func (w *Writer) Writer(writter io.Writer) {
 	w.lck.Lock()
 	defer w.lck.Unlock()
@@ -209,6 +233,9 @@ func (w *Writer) Commit(entry Entry) {
 			CommitFail(entry, err)
 		}
 	}()
+	if w.r != nil && !w.r.Result(entry) {
+		return
+	}
 	if w.f == nil {
 		err = e.New("formater not set")
 		return
@@ -276,6 +303,7 @@ type Generic struct {
 	s       Storer
 	chclose chan chan struct{}
 	o       *outer
+	r       Ruler
 }
 
 func NewGeneric(s Storer) LogBackend {
@@ -294,6 +322,11 @@ func (g *Generic) GetF() Formatter {
 	return g.f
 }
 
+func (g *Generic) Filter(r Ruler) LogBackend {
+	g.r = r
+	return g
+}
+
 func (g *Generic) Commit(entry Entry) {
 	var err error
 	defer func() {
@@ -301,6 +334,9 @@ func (g *Generic) Commit(entry Entry) {
 			CommitFail(entry, err)
 		}
 	}()
+	if g.r != nil && !g.r.Result(entry) {
+		return
+	}
 	if g.f == nil {
 		err = e.New("formater not set")
 		return

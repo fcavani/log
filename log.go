@@ -170,6 +170,17 @@ func (l *log) SetStore(b LogBackend) Logger {
 	return n
 }
 
+func (l *log) Sorter(r Ruler) Logger {
+	n := l.clone()
+	n.store.Filter(r)
+	return n
+}
+
+func (l *log) SetLevel(level Level) Logger {
+	l.store.Filter(Op(Le, "level", level))
+	return l
+}
+
 func (l *log) Bytes() []byte {
 	buf, err := l.f.Format(l)
 	if err != nil {
@@ -471,4 +482,12 @@ func Store() LogBackend {
 func GetLogger() Logger {
 	n := Log.(*log).clone()
 	return n
+}
+
+func Sorter(r Ruler) Logger {
+	return Log.Sorter(r)
+}
+
+func SetLevel(l Level) Logger {
+	return Log.SetLevel(l)
 }

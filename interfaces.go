@@ -32,6 +32,11 @@ type Entry interface {
 	Bytes() []byte
 	// Formatter sets the formater for that entry
 	Formatter(f Formatter)
+	// Sorter set one filter for the backend associated with the logger.
+	// This filter works after the filter set in the New statment.
+	Sorter(r Ruler) Logger
+	// SetLevel sets the log Level for this logger
+	SetLevel(l Level) Logger
 }
 
 type TemplateSetup interface {
@@ -61,6 +66,8 @@ type LogBackend interface {
 	F(f Formatter) LogBackend
 	// GetF returns the Formatter for this backend.
 	GetF() Formatter
+	//Filter change the filter associated to this backend
+	Filter(r Ruler) LogBackend
 }
 
 type Cursor interface {
