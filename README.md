@@ -8,13 +8,13 @@ Log package is much like the go log package. But it have a fill more tricks, lik
 
 Below is the table with the go benchmark for some loggers packages
 ([PureGolog](https://golang.org/pkg/log/), [GoLogging](https://github.com/op/go-logging), [Logrus](https://github.com/Sirupsen/logrus))
-and for some cases with different backends of this package.
+and for some cases with different backends.
 All three loggers above was set to log to /dev/null, and use the most simple
 configuration that I can find, thus they will have good performance, with is
 the case for the go log, it is the most simple and the base line for the others.
 In some cases this logger can win Logrus, the slower logger between the
-other two, but I doubt that StoreMap, it stores
-all logged data in memory, will have practical use by anyone.
+other two, but I doubt that StoreMap, that stores
+all logged data into memory, will have practical use by anyone.
 
 ```
 BenchmarkPureGolog-4    	 1000000	      1465 ns/op	  12.28 MB/s
@@ -49,7 +49,7 @@ file log without buffer will work.
 
 For the database (BoltDb and MongoDb), I don't have information if this numbers
 correspond to the reality. In the case of MongoDb with buffers the number of
-runs is too small that the buffer size become a problem and make the backend
+runs is too small, the buffer size become a problem and make the backend
 work slower.
 
 The last two rows are for cases where you want to plug one logger to this one.
@@ -61,5 +61,46 @@ and backends. You can mix all backends with all filters and make a great custom
 logger easily, but its slow. :) It's the first version too.
 
 #Backends
+
+The backend is responsable to put the log entry in some place. The backends avalible
+are:
+
+* `NewSendToLogger(logger *golog.Logger) LogBackend` - Only to demonstratio,
+send all log entries to go logger.
+* `NewWriter(w io.Writer) LogBackend` - Log to a writer. It can be a file or
+anything.
+* `NewGeneric(s Storer) LogBackend` - Log to anything that implements a Storer
+interface.
+* `NewSyslog(w *syslog.Writer) LogBackend` - Log to syslog.
+* `NewMulti(vals ...interface{}) LogBackend` - Log the data to multiples backends.
+  The syntax is: first the backend followed by the formattter, than another
+  backend and follows like this.
+
+Anything that implements the LogBackend can be used to store the log entry.
+
+## Example 1
+
+```
+// Write to stdout with DefFormatter formatter.
+Log = New(
+  NewWriter(os.Stdout).F(DefFormatter),
+  false,
+)
+```
+
+## Example 2
+```
+// Write to stdout and to MongoDb
+mongodb, _ = NewMongoDb(...)
+Log = New(
+  NewMulti(
+    NewWriter(os.Stdout).F(DefFormatter),
+    DefFormatter,
+    NewGeneric(mongodb),
+    DefFormatter,
+  ),
+  false,
+)
+```  
 
 #Filters
