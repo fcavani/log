@@ -65,12 +65,12 @@ logger easily, but its slow. :) It's the first version too.
 The backend is responsable to put the log entry in some place. The backends avalible
 are:
 
-* `NewSendToLogger(logger *golog.Logger) LogBackend` - Only to demonstratio,
+* `NewSendToLogger(logger *golog.Logger) LogBackend` - Only to demonstrate,
 send all log entries to go logger.
 * `NewWriter(w io.Writer) LogBackend` - Log to a writer. It can be a file or
 anything.
-* `NewGeneric(s Storer) LogBackend` - Log to anything that implements a Storer
-interface.
+* `NewGeneric(s Storer) LogBackend` - Log to anything that implements a [Storer
+interface](https://godoc.org/github.com/fcavani/log#Storer).
 * `NewSyslog(w *syslog.Writer) LogBackend` - Log to syslog.
 * `NewMulti(vals ...interface{}) LogBackend` - Log the data to multiples backends.
   The syntax is: first the backend followed by the formattter, than another
@@ -82,8 +82,8 @@ Anything that implements the LogBackend can be used to store the log entry.
 
 ```
 // Write to stdout with DefFormatter formatter.
-Log = New(
-  NewWriter(os.Stdout).F(DefFormatter),
+Log = log.New(
+  log.NewWriter(os.Stdout).F(log.DefFormatter),
   false,
 )
 ```
@@ -91,16 +91,18 @@ Log = New(
 ## Example 2
 ```
 // Write to stdout and to MongoDb
-mongodb, _ = NewMongoDb(...)
-Log = New(
-  NewMulti(
-    NewWriter(os.Stdout).F(DefFormatter),
-    DefFormatter,
-    NewGeneric(mongodb),
-    DefFormatter,
+mongodb, _ = log.NewMongoDb(...)
+Log = log.New(
+  log.NewMulti(
+    log.NewWriter(os.Stdout),
+    log.DefFormatter,
+    log.NewGeneric(mongodb),
+    log.DefFormatter,
   ),
   false,
 )
 ```  
 
 #Filters
+
+With filter you can chose what you will see in each backend.
