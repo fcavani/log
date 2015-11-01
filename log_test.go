@@ -361,6 +361,32 @@ func BenchmarkLogFileBuffer(b *testing.B) {
 	}
 }
 
+func BenchmarkLogfmt(b *testing.B) {
+	name, err := rand.FileName("BenchmarkLogFile", ".log", 10)
+	if err != nil {
+		b.Error(e.Trace(e.Forward(err)))
+	}
+	name = os.TempDir() + name
+	file, err := os.Create(name)
+	if err != nil {
+		b.Error(e.Trace(e.Forward(err)))
+	}
+	defer os.Remove(name)
+	defer file.Close()
+
+	logger := New(
+		NewLogfmt(file),
+		false,
+	).Domain("test")
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		logger.Print(msg)
+		b.SetBytes(l)
+	}
+}
+
 func BenchmarkStoreMap(b *testing.B) {
 	m, _ := NewMap(b.N)
 	logger := New(
