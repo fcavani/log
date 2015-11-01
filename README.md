@@ -37,6 +37,27 @@ Setting the default level:
 log.SetLevel(log.WarnPrio)
 ```
 
+#Change the log format
+
+You can change the format of the log entry. In NewStdFormatter we have
+the separator, the template, with fields named after the struct that implements
+[Entry interface](https://godoc.org/github.com/fcavani/log#Entry), a sample of that struct,
+a map with values that appears in template string but not appears in the struct,
+like host in the example below.
+
+```
+form, _ := log.NewStdFormatter(
+  "::",
+  "::host - ::domain - ::date - ::level - ::tags - ::file ::msg",
+  log.Log,
+  map[string]interface{}{
+    "host": hostname,
+  }
+)
+```
+
+To use this format: `log.Log.Formatter(form)`
+
 #Considerations about speed
 
 Below is the table with the go benchmark for some loggers packages
