@@ -7,7 +7,7 @@ Log package is much like the go log package. But it have a fill more tricks, lik
 #Normal use
 
 First import: `import "github.com/fcavani/log"`
-Than use one of the free functions in the [documentation](https://godoc.org/github.com/fcavani/log)).
+Than use one of the free functions in the [documentation](https://godoc.org/github.com/fcavani/log).
 
 ```
 // Normal log
