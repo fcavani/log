@@ -313,7 +313,7 @@ func (a and) Result(entry Entry) (r bool) {
 	return
 }
 
-// And operador between two rules.
+// And operator between two rules.
 func And(v ...Ruler) Ruler {
 	return &and{
 		rulers: v,
@@ -332,7 +332,7 @@ func (o or) Result(entry Entry) (r bool) {
 	return
 }
 
-// Or operador between two rules.
+// Or operator between two rules.
 func Or(v ...Ruler) Ruler {
 	return &or{
 		rulers: v,
@@ -347,7 +347,7 @@ func (n not) Result(entry Entry) bool {
 	return !n.Ruler.Result(entry)
 }
 
-// Not operador for one rule.
+// Not operator for one rule.
 func Not(r Ruler) Ruler {
 	return &not{
 		Ruler: r,

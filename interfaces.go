@@ -137,7 +137,7 @@ type StdLogger interface {
 
 type PanicStack interface {
 	// GoPanic handle a panic where r is the value of recover()
-	// stack is the buffer with the stack dump e cont if false
+	// stack is the buffer where will be the stack dump and cont is false if
 	// GoPanic will call os.Exit(1).
 	GoPanic(r interface{}, stack []byte, cont bool)
 }

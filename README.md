@@ -4,6 +4,39 @@
 
 Log package is much like the go log package. But it have a fill more tricks, like backends and filters.
 
+#Normal use
+
+First import: `import "github.com/fcavani/log"`
+Than use one of the free functions in the [documentation](https://godoc.org/github.com/fcavani/log)).
+
+```
+// Normal log
+log.Println("log this")
+// Log error
+log.Error("Error:", err)
+// Log fatal, fallowed by a os.Exit(1) call
+log.Fatal("Can't handle this error:", err)
+// Panic, calls panic after log. Maybe because the backend the log may get lost.
+log.Panic("panic!")
+```
+
+Modificators:
+
+```
+// Associate a tag with the log.
+log.Tag("tag").Println("test")
+// More tags
+log.Tag("tag1", "tag2").Println("test")
+// Determine the level
+log.ProtoLevel().Println("some dirty protocol thing")
+```
+
+Setting the default level:
+
+```
+log.SetLevel(log.WarnPrio)
+```
+
 #Considerations about speed
 
 Below is the table with the go benchmark for some loggers packages
@@ -75,8 +108,14 @@ interface](https://godoc.org/github.com/fcavani/log#Storer).
 * `NewMulti(vals ...interface{}) LogBackend` - Log the data to multiples backends.
   The syntax is: first the backend followed by the formattter, than another
   backend and follows like this.
+* `NewOutBuffer(bak LogBackend, size int) LogBackend` - NewOutBuffer creates a
+buffer between the bak backend and the commit of a new log entry. It can improve
+the latency of commit but delays the final store, with can't cause log miss
+if the application shutdown improperly (without close the buffer) or panic
+before the buffer become empty.
 
-Anything that implements the LogBackend can be used to store the log entry.
+Anything that implements the [LogBackend interface](https://godoc.org/github.com/fcavani/log#LogBackend)
+can be used to store the log entry.
 
 ## Example 1
 
@@ -106,3 +145,35 @@ Log = log.New(
 #Filters
 
 With filter you can chose what you will see in each backend.
+In the example below if the field msg not (log.Not)
+contains (log.Cnts) "not log" the message will be logged. The principal function
+is the `log.Op(o Operation, field string, vleft ...interface{}) Ruler`.
+In this function you can use [others operations like Cnts](https://godoc.org/github.com/fcavani/log#Operation)
+and you can modify the result of it with the function `log.Not` or you can
+combine the result with others Op functions with `log.And` and `log.Or`.
+Like the backends anything that implements [Ruler interface](https://godoc.org/github.com/fcavani/log#Ruler)
+can be used to filter one log entry.
+
+## Example
+
+```
+Log = log.New(
+  log.Filter(
+    log.NewWriter(buf),
+    log.Not(log.Op(log.Cnts, "msg", "not log")),
+  ).F(log.DefFormatter),
+  false,
+)
+```
+
+#Storer
+
+Stores with `NewGeneric(s Storer)` can put the logs entries in any place for
+future analysis. All stores must respect the [Storer interface](https://godoc.org/github.com/fcavani/log#Storer),
+that is a simple CRUD like interface with the DB inspired in the BoltDb API.
+This is the stores available:
+
+* [MongoDB](https://godoc.org/github.com/fcavani/log#MongoDb)
+* [BoltDB](https://godoc.org/github.com/fcavani/log#BoltDb)
+* [Map](https://godoc.org/github.com/fcavani/log#Map): That is a storer that uses
+go map to store log entries.
