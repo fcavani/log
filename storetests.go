@@ -69,6 +69,10 @@ func (et *TestStruct) Sorter(r Ruler) Logger {
 	return nil
 }
 
+func (et *TestStruct) EntryLevel(l Level) Logger {
+	return nil
+}
+
 func init() {
 	types.Insert(&TestStruct{})
 }

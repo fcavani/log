@@ -147,7 +147,7 @@ func (mp *MultiLog) Commit(entry Entry) {
 
 // outerLog is like outers outerLogs but the nem entry is
 // created from the first BackLog in the list.
-func (mp *MultiLog) OuterLog(tag string) io.Writer {
+func (mp *MultiLog) OuterLog(tag string, level Level) io.Writer {
 	if mp.o != nil {
 		return mp.o
 	}
@@ -157,7 +157,7 @@ func (mp *MultiLog) OuterLog(tag string) io.Writer {
 		return nil
 	}
 	f := mp.mp[0].GetF()
-	logger := f.NewEntry(mp).Tag("outer")
+	logger := f.NewEntry(mp).Tag("outer").EntryLevel(level)
 	go func() {
 		for {
 			select {
@@ -262,13 +262,13 @@ func (w *Writer) Commit(entry Entry) {
 	}
 }
 
-func (w *Writer) OuterLog(tag string) io.Writer {
+func (w *Writer) OuterLog(tag string, level Level) io.Writer {
 	if w.o != nil {
 		return w.o
 	}
 	w.chclose = make(chan chan struct{})
 	ch := make(chan []byte)
-	logger := w.f.NewEntry(w).Tag("outer")
+	logger := w.f.NewEntry(w).Tag("outer").EntryLevel(level)
 	go func() {
 		for {
 			select {
@@ -355,13 +355,13 @@ func (g *Generic) Commit(entry Entry) {
 	}
 }
 
-func (g *Generic) OuterLog(tag string) io.Writer {
+func (g *Generic) OuterLog(tag string, level Level) io.Writer {
 	if g.o != nil {
 		return g.o
 	}
 	g.chclose = make(chan chan struct{})
 	ch := make(chan []byte)
-	logger := g.f.NewEntry(g).Tag("outer")
+	logger := g.f.NewEntry(g).Tag("outer").EntryLevel(level)
 	go func() {
 		for {
 			select {

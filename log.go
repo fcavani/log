@@ -364,6 +364,12 @@ func (l *log) GoPanic(r interface{}, stack []byte, cont bool) {
 	}
 }
 
+func (l *log) EntryLevel(prio Level) Logger {
+	n := l.clone()
+	n.Priority = prio
+	return n
+}
+
 func (l *log) ProtoLevel() Logger {
 	n := l.clone()
 	n.Priority = ProtoPrio
@@ -523,4 +529,8 @@ func Sorter(r Ruler) Logger {
 
 func SetLevel(l Level) Logger {
 	return Log.SetLevel(l)
+}
+
+func EntryLevel(prio Level) Logger {
+	return Log.EntryLevel(prio)
 }

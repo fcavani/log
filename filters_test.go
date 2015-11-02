@@ -75,6 +75,10 @@ func (t *testEntry) Sorter(r Ruler) Logger {
 	return nil
 }
 
+func (t *testEntry) EntryLevel(l Level) Logger {
+	return nil
+}
+
 func TestInvalidOperation(t *testing.T) {
 	defer func() {
 		r := recover()

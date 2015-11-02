@@ -66,6 +66,7 @@ func testLogBackend(t *testing.T, pers testPers) {
 	DefFormatter.NewEntry(back).Print(pers.result)
 	//DefFormatter.NewEntry(pers.backend).Println(pers.result)
 
+	t.Log("Test backend")
 	if pers.store == nil {
 		test(t, buf, pers.result)
 	} else {
@@ -76,7 +77,7 @@ func testLogBackend(t *testing.T, pers testPers) {
 	if !ok {
 		return
 	}
-	w := olog.OuterLog("tag")
+	w := olog.OuterLog("tag", InfoPrio)
 	defer olog.Close()
 	str := "test outer logger\n"
 	n, err := w.Write([]byte(str))
@@ -91,6 +92,7 @@ func testLogBackend(t *testing.T, pers testPers) {
 		t.Fatal(e.Trace(e.Forward(err)))
 	}
 
+	t.Log("Test outer")
 	if pers.store == nil {
 		test(t, buf, str)
 	} else {
