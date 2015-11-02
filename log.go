@@ -30,7 +30,7 @@ func init() {
 	}
 	DefFormatter, _ = NewStdFormatter(
 		"::",
-		"::host - ::domain - ::date - ::level - ::tags - ::file ::msg",
+		"::host - ::domain - ::date - ::level - ::tags - ::file - ::msg",
 		&log{Labels: &tags.Tags{}},
 		map[string]interface{}{
 			"host": hostname,
