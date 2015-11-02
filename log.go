@@ -16,6 +16,7 @@ import (
 	"github.com/fcavani/e"
 	"github.com/fcavani/tags"
 	"github.com/fcavani/types"
+	"github.com/go-logfmt/logfmt"
 )
 
 var Log Logger
@@ -66,6 +67,38 @@ func New(b LogBackend, debug bool) *log {
 		store:    b,
 		Debug:    debug,
 	}
+}
+
+func (l *log) Logfmt(enc *logfmt.Encoder) error {
+	err := enc.EncodeKeyval("date", l.Timestamp)
+	if err != nil {
+		return e.Forward(err)
+	}
+	err = enc.EncodeKeyval("level", l.Priority)
+	if err != nil {
+		return e.Forward(err)
+	}
+	err = enc.EncodeKeyval("tags", l.Labels.String())
+	if err != nil {
+		return e.Forward(err)
+	}
+	err = enc.EncodeKeyval("msg", l.Msg)
+	if err != nil {
+		return e.Forward(err)
+	}
+	err = enc.EncodeKeyval("domain", l.Dom)
+	if err != nil {
+		return e.Forward(err)
+	}
+	err = enc.EncodeKeyval("file", l.File)
+	if err != nil {
+		return e.Forward(err)
+	}
+	err = enc.EndRecord()
+	if err != nil {
+		return e.Forward(err)
+	}
+	return nil
 }
 
 func (l *log) clone() *log {

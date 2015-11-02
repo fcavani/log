@@ -40,6 +40,13 @@ func (l *Logfmt) Commit(entry Entry) {
 	if l.r != nil && !l.r.Result(entry) {
 		return
 	}
+	if lfmt, ok := entry.(Logfmter); ok {
+		err := lfmt.Logfmt(l.enc)
+		if err != nil {
+			Fail(err)
+		}
+		return
+	}
 	val := reflect.Indirect(reflect.ValueOf(entry))
 	t := val.Type()
 	for i := 0; i < t.NumField(); i++ {

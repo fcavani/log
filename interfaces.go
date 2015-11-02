@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/fcavani/tags"
+	"github.com/go-logfmt/logfmt"
 )
 
 type Entry interface {
@@ -166,6 +167,11 @@ type Logger interface {
 	Error(...interface{})
 	Errorf(string, ...interface{})
 	Errorln(...interface{})
+}
+
+// Logfmter encode a log entry in logfmt format.
+type Logfmter interface {
+	Logfmt(enc *logfmt.Encoder) error
 }
 
 // go test -bench=. -cpu=1,4 -benchmem
