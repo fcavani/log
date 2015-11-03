@@ -70,21 +70,22 @@ In some cases this logger can win Logrus, the slower logger between the
 other two, but I doubt that StoreMap, that stores
 all logged data into memory, will have practical use by anyone.
 
-```
-BenchmarkPureGolog-4    	 1000000	      1465 ns/op	  12.28 MB/s
-BenchmarkGoLogging-4    	 1000000	      2235 ns/op	   8.05 MB/s
-BenchmarkLogrus-4       	  300000	      5167 ns/op	   3.48 MB/s
-BenchmarkGolog-4        	  200000	      6483 ns/op	   2.78 MB/s
-BenchmarkLogStderr-4    	  200000	      5641 ns/op	   3.19 MB/s
-BenchmarkLogFile-4      	  200000	      8276 ns/op	   2.17 MB/s
-BenchmarkLogFileBuffer-4	  300000	      4838 ns/op	   3.72 MB/s
-BenchmarkStoreMap-4     	  500000	      3749 ns/op	   4.80 MB/s
-BenchmarkBoltDb-4       	    3000	    552564 ns/op	   0.03 MB/s
-BenchmarkBoltDbBuffer-4 	    5000	    270518 ns/op	   0.07 MB/s
-BenchmarkMongoDb-4      	    2000	   1052129 ns/op	   0.02 MB/s
-BenchmarkMongoDbBuffer-4	     100	  11864291 ns/op	   0.00 MB/s
-BenchmarkLogOuterNull-4	    200000	      8006 ns/op	   2.25 MB/s
-BenchmarkLogOuterFile-4	    100000	     15351 ns/op	   1.17 MB/s
+Name | N | Time | Rate
+-----|---|------|------
+BenchmarkPureGolog-4|1000000|1465 ns/op|12.28 MB/s
+BenchmarkGoLogging-4|1000000|2235 ns/op|8.05 MB/s
+BenchmarkLogrus-4|300000|5167 ns/op|3.48 MB/s
+BenchmarkGolog-4|200000|6483 ns/op|2.78 MB/s
+BenchmarkLogStderr-4|200000|5641 ns/op|3.19 MB/s
+BenchmarkLogFile-4|200000|8276 ns/op|2.17 MB/s
+BenchmarkLogFileBuffer-4|300000|4838 ns/op|3.72 MB/s
+BenchmarkStoreMap-4|500000|3749 ns/op|4.80 MB/s
+BenchmarkBoltDb-4|3000|552564 ns/op|0.03 MB/s
+BenchmarkBoltDbBuffer-4|5000|270518 ns/op|0.07 MB/s
+BenchmarkMongoDb-4|2000|1052129 ns/op|0.02 MB/s
+BenchmarkMongoDbBuffer-4|100|11864291 ns/op|0.00 MB/s
+BenchmarkLogOuterNull-4|200000|8006 ns/op|2.25 MB/s
+BenchmarkLogOuterFile-4|100000|15351 ns/op|1.17 MB/s
 ```
 
 LogFileBuffer is interesting if you can setup a buffer larger enough to
