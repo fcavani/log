@@ -34,8 +34,12 @@ log.ProtoLevel().Println("some dirty protocol thing")
 Setting the default level:
 
 ```
-log.SetLevel(log.WarnPrio)
+log.SetLevel("all", log.WarnPrio)
 ```
+
+In place of `"all"`, you can put the name of one package, than that level
+will be restrict to this package. You can repeat this functions for any
+package. 
 
 #Change the log format
 
