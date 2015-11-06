@@ -61,6 +61,8 @@ const (
 	Cnts
 	// Regexp
 	Re
+	// Pr matches the begin of string
+	Pr
 )
 
 type op struct {
@@ -273,6 +275,16 @@ func (o op) Result(entry Entry) bool {
 				return pre.MatchString(vrigth.String())
 			}
 			panic("logger: contains only works with vleft of string type or *regexp.Regexp")
+		default:
+			panic("logger: field type of entry is not supported")
+		}
+	case Pr:
+		switch vrigth.Kind() {
+		case reflect.String:
+			if o.vleft.Kind() != reflect.String {
+				panic("logger: begins only works with vleft of string type")
+			}
+			return strings.HasPrefix(vrigth.String(), o.vleft.String())
 		default:
 			panic("logger: field type of entry is not supported")
 		}

@@ -229,7 +229,7 @@ func (l *log) SetLevel(scope string, level Level) Logger {
 		l.DefLevel = Op(Le, "level", level)
 	} else {
 		l.Levels[scope] = &If{
-			Condition: Op(Eq, "pkg", scope),
+			Condition: Op(Pr, "pkg", scope),
 			Than:      Op(Le, "level", level),
 		}
 	}

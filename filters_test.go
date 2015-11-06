@@ -207,6 +207,23 @@ func TestCnts(t *testing.T) {
 	}
 }
 
+func TestPr(t *testing.T) {
+	ruler := Op(Pr, "str", "isto é")
+	r := ruler.Result(&testEntry{
+		Str: "isto é apenas um teste",
+	})
+	if !r {
+		t.Fatal("result is invalid")
+	}
+	ruler = Op(Pr, "str", "meleca")
+	r = ruler.Result(&testEntry{
+		Str: "isto é apenas um teste",
+	})
+	if r {
+		t.Fatal("result is invalid")
+	}
+}
+
 func TestRe(t *testing.T) {
 	ruler := Op(Re, "str", `([a-zA-Z0-9]+)([.-_][a-zA-Z0-9]+)*@([a-zA-Z0-9]+)([.-_][a-zA-Z0-9]+)*`)
 	r := ruler.Result(&testEntry{
