@@ -353,3 +353,87 @@ func Not(r Ruler) Ruler {
 		Ruler: r,
 	}
 }
+
+type apply struct {
+	condition Ruler
+	rule      Ruler
+}
+
+func (a apply) Result(entry Entry) bool {
+	if a.condition.Result(entry) {
+		return a.rule.Result(entry)
+	}
+	return true
+}
+
+// ApplyRuleIf test if condition is true than apply rule. If condition is false
+// do nothing, return true.
+func ApplyRuleIf(condition, rule Ruler) Ruler {
+	return &apply{
+		condition: condition,
+		rule:      rule,
+	}
+}
+
+type applyelse struct {
+	condition Ruler
+	rule      Ruler
+	el        Ruler
+}
+
+func (a applyelse) Result(entry Entry) bool {
+	if a.condition.Result(entry) {
+		return a.rule.Result(entry)
+	}
+	return a.el.Result(entry)
+}
+
+// ApplyRuleIfElse test if condition is true than apply rule. If condition is false
+// run else rule.
+func ApplyRuleIfElse(condition, rule, el Ruler) Ruler {
+	return &applyelse{
+		condition: condition,
+		rule:      rule,
+		el:        el,
+	}
+}
+
+// True ruler return alway true
+type True struct{}
+
+func (t True) Result(entry Entry) bool {
+	return true
+}
+
+// False ruler return always false
+type False struct{}
+
+func (f False) Result(entry Entry) bool {
+	return false
+}
+
+type If struct {
+	Condition Ruler
+	Than      Ruler
+}
+
+type sel struct {
+	Ifs     []*If
+	Default Ruler
+}
+
+func (s *sel) Result(entry Entry) bool {
+	for _, cond := range s.Ifs {
+		if cond.Condition.Result(entry) {
+			return cond.Than.Result(entry)
+		}
+	}
+	return s.Default.Result(entry)
+}
+
+func Select(ifs []*If, def Ruler) Ruler {
+	return &sel{
+		Ifs:     ifs,
+		Default: def,
+	}
+}

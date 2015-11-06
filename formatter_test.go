@@ -60,7 +60,7 @@ func (et *entryTest) Formatter(f Formatter) {
 
 }
 
-func (et *entryTest) SetLevel(level Level) Logger {
+func (et *entryTest) SetLevel(scope string, level Level) Logger {
 	return nil
 }
 
@@ -116,7 +116,7 @@ func (et *entryTest2) Formatter(f Formatter) {
 
 }
 
-func (et *entryTest2) SetLevel(level Level) Logger {
+func (et *entryTest2) SetLevel(scope string, level Level) Logger {
 	return nil
 }
 

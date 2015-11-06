@@ -61,7 +61,7 @@ func (et *TestStruct) Formatter(f Formatter) {
 
 }
 
-func (et *TestStruct) SetLevel(level Level) Logger {
+func (et *TestStruct) SetLevel(scope string, level Level) Logger {
 	return nil
 }
 

@@ -67,7 +67,7 @@ func (t *testEntry) Formatter(f Formatter) {
 	return
 }
 
-func (t *testEntry) SetLevel(level Level) Logger {
+func (t *testEntry) SetLevel(scope string, level Level) Logger {
 	return nil
 }
 

@@ -53,6 +53,10 @@ type log struct {
 	store     LogBackend
 	Debug     bool
 	File      string `log:"file"`
+	Pkg       string `log:"pkg"`
+	Func      string `log:"func"`
+	Levels    map[string]*If
+	DefLevel  Ruler
 }
 
 func init() {
@@ -66,6 +70,8 @@ func New(b LogBackend, debug bool) *log {
 		Labels:   &tags.Tags{},
 		store:    b,
 		Debug:    debug,
+		Levels:   make(map[string]*If),
+		DefLevel: True{},
 	}
 }
 
@@ -111,6 +117,8 @@ func (l *log) clone() *log {
 		E:         e.Copy(l.E),
 		store:     l.store,
 		Debug:     l.Debug,
+		Levels:    l.Levels,
+		DefLevel:  l.DefLevel,
 	}
 }
 
@@ -128,7 +136,8 @@ func (l *log) debugInfo() {
 	}
 	var ok bool
 	var line int
-	_, l.File, line, ok = runtime.Caller(2)
+	var pc uintptr
+	pc, l.File, line, ok = runtime.Caller(2)
 	if ok {
 		s := strings.Split(l.File, "/")
 		length := len(s)
@@ -136,6 +145,12 @@ func (l *log) debugInfo() {
 			l.File = strings.Join(s[length-2:length], "/") + ":" + strconv.Itoa(line)
 		} else {
 			l.File = s[0] + ":" + strconv.Itoa(line)
+		}
+		f := runtime.FuncForPC(pc)
+		l.Func = f.Name()
+		i := strings.LastIndex(l.Func, ".")
+		if i > -1 {
+			l.Pkg = l.Func[:i]
 		}
 	}
 }
@@ -209,8 +224,20 @@ func (l *log) Sorter(r Ruler) Logger {
 	return n
 }
 
-func (l *log) SetLevel(level Level) Logger {
-	l.store.Filter(Op(Le, "level", level))
+func (l *log) SetLevel(scope string, level Level) Logger {
+	if scope == "all" {
+		l.DefLevel = Op(Le, "level", level)
+	} else {
+		l.Levels[scope] = &If{
+			Condition: Op(Eq, "pkg", scope),
+			Than:      Op(Le, "level", level),
+		}
+	}
+	ifs := make([]*If, 0, len(l.Levels))
+	for _, cond := range l.Levels {
+		ifs = append(ifs, cond)
+	}
+	l.store.Filter(Select(ifs, l.DefLevel))
 	return l
 }
 
@@ -527,8 +554,8 @@ func Sorter(r Ruler) Logger {
 	return Log.Sorter(r)
 }
 
-func SetLevel(l Level) Logger {
-	return Log.SetLevel(l)
+func SetLevel(scope string, l Level) Logger {
+	return Log.SetLevel(scope, l)
 }
 
 func EntryLevel(prio Level) Logger {

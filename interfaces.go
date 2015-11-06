@@ -36,8 +36,9 @@ type Entry interface {
 	// Sorter set one filter for the backend associated with the logger.
 	// This filter works after the filter set in the New statment.
 	Sorter(r Ruler) Logger
-	// SetLevel sets the log Level for this logger
-	SetLevel(l Level) Logger
+	// SetLevel sets the log Level for this logger. Scope all setlevel for everything.
+	// If Scope is a packege set log level only for this package.
+	SetLevel(scope string, l Level) Logger
 	// EntryLevel set the level for this log entry.
 	EntryLevel(l Level) Logger
 }

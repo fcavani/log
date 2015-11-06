@@ -79,7 +79,7 @@ func TestLevels(t *testing.T) {
 	multi := NewMulti(NewSendToLogger(nil), DefFormatter, NewSendToLogger(l), DefFormatter)
 	Log = New(multi, false).Domain("test")
 
-	Log.SetLevel(DebugPrio)
+	Log.SetLevel("all", DebugPrio)
 
 	Println("oi")
 	test(t, buf, "oi")
