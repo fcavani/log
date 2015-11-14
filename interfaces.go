@@ -41,6 +41,8 @@ type Entry interface {
 	SetLevel(scope string, l Level) Logger
 	// EntryLevel set the level for this log entry.
 	EntryLevel(l Level) Logger
+	// DebugInfo write into the struct debug information.
+	DebugInfo() Logger
 }
 
 type TemplateSetup interface {

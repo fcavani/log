@@ -73,6 +73,10 @@ func (et *TestStruct) EntryLevel(l Level) Logger {
 	return nil
 }
 
+func (et *TestStruct) DebugInfo() Logger {
+	return nil
+}
+
 func init() {
 	types.Insert(&TestStruct{})
 }

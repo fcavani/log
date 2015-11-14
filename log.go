@@ -130,14 +130,14 @@ func (l *log) error(err error) {
 	n.FatalLevel().Domain("logger").Tag("internal").Tag("error").Println(err)
 }
 
-func (l *log) debugInfo() {
-	if !l.Debug {
+func (l *log) debugInfo(level int) {
+	if !l.Debug || l.File != "" {
 		return
 	}
 	var ok bool
 	var line int
 	var pc uintptr
-	pc, l.File, line, ok = runtime.Caller(2)
+	pc, l.File, line, ok = runtime.Caller(level)
 	if ok {
 		s := strings.Split(l.File, "/")
 		length := len(s)
@@ -153,6 +153,12 @@ func (l *log) debugInfo() {
 			l.Pkg = l.Func[:i]
 		}
 	}
+}
+
+func (l *log) DebugInfo() Logger {
+	n := l.clone()
+	n.debugInfo(3)
+	return n
 }
 
 func (l *log) Err() error {
@@ -265,7 +271,7 @@ func (l *log) Print(v ...interface{}) {
 	n := l.clone()
 	n.Msg = fmt.Sprint(v...)
 	n.Timestamp = time.Now()
-	n.debugInfo()
+	n.debugInfo(2)
 	n.store.Commit(n)
 }
 
@@ -273,7 +279,7 @@ func (l *log) Printf(f string, v ...interface{}) {
 	n := l.clone()
 	n.Msg = fmt.Sprintf(f, v...)
 	n.Timestamp = time.Now()
-	n.debugInfo()
+	n.debugInfo(2)
 	n.store.Commit(n)
 }
 
@@ -281,7 +287,7 @@ func (l *log) Println(v ...interface{}) {
 	n := l.clone()
 	n.Msg = fmt.Sprintln(v...)
 	n.Timestamp = time.Now()
-	n.debugInfo()
+	n.debugInfo(2)
 	n.store.Commit(n)
 }
 
@@ -290,7 +296,7 @@ func (l *log) Fatal(v ...interface{}) {
 	n.Priority = FatalPrio
 	n.Msg = fmt.Sprint(v...)
 	n.Timestamp = time.Now()
-	n.debugInfo()
+	n.debugInfo(2)
 	n.store.Commit(n)
 	os.Exit(1)
 }
@@ -300,7 +306,7 @@ func (l *log) Fatalf(f string, v ...interface{}) {
 	n.Priority = FatalPrio
 	n.Msg = fmt.Sprintf(f, v...)
 	n.Timestamp = time.Now()
-	n.debugInfo()
+	n.debugInfo(2)
 	n.store.Commit(n)
 	os.Exit(1)
 }
@@ -310,7 +316,7 @@ func (l *log) Fatalln(v ...interface{}) {
 	n.Priority = FatalPrio
 	n.Msg = fmt.Sprintln(v...)
 	n.Timestamp = time.Now()
-	n.debugInfo()
+	n.debugInfo(2)
 	n.store.Commit(n)
 	os.Exit(1)
 }
@@ -320,7 +326,7 @@ func (l *log) Panic(v ...interface{}) {
 	n.Priority = PanicPrio
 	n.Msg = fmt.Sprint(v...)
 	n.Timestamp = time.Now()
-	n.debugInfo()
+	n.debugInfo(2)
 	n.store.Commit(n)
 	panic(n.Msg)
 }
@@ -330,7 +336,7 @@ func (l *log) Panicf(f string, v ...interface{}) {
 	n.Priority = PanicPrio
 	n.Msg = fmt.Sprintf(f, v...)
 	n.Timestamp = time.Now()
-	n.debugInfo()
+	n.debugInfo(2)
 	n.store.Commit(n)
 	panic(n.Msg)
 }
@@ -340,7 +346,7 @@ func (l *log) Panicln(v ...interface{}) {
 	n.Priority = PanicPrio
 	n.Msg = fmt.Sprintln(v...)
 	n.Timestamp = time.Now()
-	n.debugInfo()
+	n.debugInfo(2)
 	n.store.Commit(n)
 	panic(n.Msg)
 }
@@ -350,7 +356,7 @@ func (l *log) Error(v ...interface{}) {
 	n.Priority = ErrorPrio
 	n.Msg = fmt.Sprint(v...)
 	n.Timestamp = time.Now()
-	n.debugInfo()
+	n.debugInfo(2)
 	n.store.Commit(n)
 }
 
@@ -359,7 +365,7 @@ func (l *log) Errorf(f string, v ...interface{}) {
 	n.Priority = ErrorPrio
 	n.Msg = fmt.Sprintf(f, v...)
 	n.Timestamp = time.Now()
-	n.debugInfo()
+	n.debugInfo(2)
 	n.store.Commit(n)
 }
 
@@ -368,7 +374,7 @@ func (l *log) Errorln(v ...interface{}) {
 	n.Priority = ErrorPrio
 	n.Msg = fmt.Sprintln(v...)
 	n.Timestamp = time.Now()
-	n.debugInfo()
+	n.debugInfo(2)
 	n.store.Commit(n)
 }
 
@@ -452,51 +458,51 @@ func Domain(d string) Logger {
 }
 
 func Print(vals ...interface{}) {
-	Log.Print(vals...)
+	Log.DebugInfo().Print(vals...)
 }
 
 func Printf(str string, vals ...interface{}) {
-	Log.Printf(str, vals...)
+	Log.DebugInfo().Printf(str, vals...)
 }
 
 func Println(vals ...interface{}) {
-	Log.Println(vals...)
+	Log.DebugInfo().Println(vals...)
 }
 
 func Fatal(vals ...interface{}) {
-	Log.Fatal(vals...)
+	Log.DebugInfo().Fatal(vals...)
 }
 
 func Fatalf(s string, vals ...interface{}) {
-	Log.Fatalf(s, vals...)
+	Log.DebugInfo().Fatalf(s, vals...)
 }
 
 func Fatalln(vals ...interface{}) {
-	Log.Fatalln(vals...)
+	Log.DebugInfo().Fatalln(vals...)
 }
 
 func Panic(vals ...interface{}) {
-	Log.Panic(vals...)
+	Log.DebugInfo().Panic(vals...)
 }
 
 func Panicf(s string, vals ...interface{}) {
-	Log.Panicf(s, vals...)
+	Log.DebugInfo().Panicf(s, vals...)
 }
 
 func Panicln(vals ...interface{}) {
-	Log.Panicln(vals...)
+	Log.DebugInfo().Panicln(vals...)
 }
 
 func Error(vals ...interface{}) {
-	Log.Error(vals...)
+	Log.DebugInfo().Error(vals...)
 }
 
 func Errorf(s string, vals ...interface{}) {
-	Log.Errorf(s, vals...)
+	Log.DebugInfo().Errorf(s, vals...)
 }
 
 func Errorln(vals ...interface{}) {
-	Log.Errorln(vals...)
+	Log.DebugInfo().Errorln(vals...)
 }
 
 func ProtoLevel() Logger {

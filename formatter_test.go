@@ -72,6 +72,10 @@ func (et *entryTest) EntryLevel(l Level) Logger {
 	return nil
 }
 
+func (et *entryTest) DebugInfo() Logger {
+	return nil
+}
+
 type entryTest2 struct {
 	Tag string `log:"tag"`
 }
@@ -125,6 +129,10 @@ func (et *entryTest2) Sorter(r Ruler) Logger {
 }
 
 func (et *entryTest2) EntryLevel(l Level) Logger {
+	return nil
+}
+
+func (et *entryTest2) DebugInfo() Logger {
 	return nil
 }
 
