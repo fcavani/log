@@ -157,7 +157,7 @@ func (l *log) debugInfo(level int) {
 
 func (l *log) DebugInfo() Logger {
 	n := l.clone()
-	n.debugInfo(3)
+	n.debugInfo(4)
 	return n
 }
 
