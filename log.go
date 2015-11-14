@@ -117,6 +117,9 @@ func (l *log) clone() *log {
 		E:         e.Copy(l.E),
 		store:     l.store,
 		Debug:     l.Debug,
+		File:      l.File,
+		Pkg:       l.Pkg,
+		Func:      l.Func,
 		Levels:    l.Levels,
 		DefLevel:  l.DefLevel,
 	}
@@ -157,7 +160,7 @@ func (l *log) debugInfo(level int) {
 
 func (l *log) DebugInfo() Logger {
 	n := l.clone()
-	n.debugInfo(4)
+	n.debugInfo(3)
 	return n
 }
 
