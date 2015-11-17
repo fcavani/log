@@ -147,7 +147,7 @@ func (mp *MultiLog) Commit(entry Entry) {
 
 // outerLog is like outers outerLogs but the nem entry is
 // created from the first BackLog in the list.
-func (mp *MultiLog) OuterLog(tag string, level Level) io.Writer {
+func (mp *MultiLog) OuterLog(level Level, tags ...string) io.Writer {
 	if mp.chouter != nil {
 		return &outer{
 			ch:  mp.chouter,
@@ -165,7 +165,7 @@ func (mp *MultiLog) OuterLog(tag string, level Level) io.Writer {
 		for {
 			select {
 			case buf := <-mp.chouter:
-				logger.Tag(tag).Println(string(buf))
+				logger.Tag(tags...).Println(string(buf))
 			case ch := <-mp.chclose:
 				ch <- struct{}{}
 				return
@@ -264,7 +264,7 @@ func (w *Writer) Commit(entry Entry) {
 	}
 }
 
-func (w *Writer) OuterLog(tag string, level Level) io.Writer {
+func (w *Writer) OuterLog(level Level, tags ...string) io.Writer {
 	if w.chouter != nil {
 		return &outer{
 			ch:  w.chouter,
@@ -278,7 +278,7 @@ func (w *Writer) OuterLog(tag string, level Level) io.Writer {
 		for {
 			select {
 			case buf := <-w.chouter:
-				logger.Tag(tag).Println(string(buf))
+				logger.Tag(tags...).Println(string(buf))
 			case ch := <-w.chclose:
 				ch <- struct{}{}
 				return
@@ -359,7 +359,7 @@ func (g *Generic) Commit(entry Entry) {
 	}
 }
 
-func (g *Generic) OuterLog(tag string, level Level) io.Writer {
+func (g *Generic) OuterLog(level Level, tags ...string) io.Writer {
 	if g.chouter != nil {
 		return &outer{
 			ch:  g.chouter,
@@ -373,7 +373,7 @@ func (g *Generic) OuterLog(tag string, level Level) io.Writer {
 		for {
 			select {
 			case buf := <-g.chouter:
-				logger.Tag(tag).Println(string(buf))
+				logger.Tag(tags...).Println(string(buf))
 			case ch := <-g.chclose:
 				ch <- struct{}{}
 				return
