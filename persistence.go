@@ -92,8 +92,8 @@ func (o *outer) Write(p []byte) (n int, err error) {
 type MultiLog struct {
 	mp      []LogBackend
 	chclose chan chan struct{}
-	o       *outer
 	r       Ruler
+	chouter chan []byte
 }
 
 //NewMulti creates a MultiLog
@@ -148,11 +148,14 @@ func (mp *MultiLog) Commit(entry Entry) {
 // outerLog is like outers outerLogs but the nem entry is
 // created from the first BackLog in the list.
 func (mp *MultiLog) OuterLog(tag string, level Level) io.Writer {
-	if mp.o != nil {
-		return mp.o
+	if mp.chouter != nil {
+		return &outer{
+			ch:  mp.chouter,
+			buf: make([]byte, 0),
+		}
 	}
 	mp.chclose = make(chan chan struct{})
-	ch := make(chan []byte)
+	mp.chouter = make(chan []byte)
 	if len(mp.mp) < 2 {
 		return nil
 	}
@@ -161,7 +164,7 @@ func (mp *MultiLog) OuterLog(tag string, level Level) io.Writer {
 	go func() {
 		for {
 			select {
-			case buf := <-ch:
+			case buf := <-mp.chouter:
 				logger.Tag(tag).Println(string(buf))
 			case ch := <-mp.chclose:
 				ch <- struct{}{}
@@ -169,21 +172,20 @@ func (mp *MultiLog) OuterLog(tag string, level Level) io.Writer {
 			}
 		}
 	}()
-	mp.o = &outer{
-		ch:  ch,
+	return &outer{
+		ch:  mp.chouter,
 		buf: make([]byte, 0),
 	}
-	return mp.o
 }
 
 func (mp *MultiLog) Close() error {
-	if mp.o == nil {
+	if mp.chclose == nil {
 		return e.New("already close")
 	}
 	ch := make(chan struct{})
 	mp.chclose <- ch
 	<-ch
-	mp.o = nil
+	mp.chclose = nil
 	return nil
 }
 
@@ -192,7 +194,7 @@ type Writer struct {
 	f       Formatter
 	w       io.Writer
 	chclose chan chan struct{}
-	o       *outer
+	chouter chan []byte
 	lck     sync.Mutex
 	r       Ruler
 }
@@ -263,16 +265,19 @@ func (w *Writer) Commit(entry Entry) {
 }
 
 func (w *Writer) OuterLog(tag string, level Level) io.Writer {
-	if w.o != nil {
-		return w.o
+	if w.chouter != nil {
+		return &outer{
+			ch:  w.chouter,
+			buf: make([]byte, 0),
+		}
 	}
 	w.chclose = make(chan chan struct{})
-	ch := make(chan []byte)
+	w.chouter = make(chan []byte)
 	logger := w.f.NewEntry(w).Tag("outer").EntryLevel(level)
 	go func() {
 		for {
 			select {
-			case buf := <-ch:
+			case buf := <-w.chouter:
 				logger.Tag(tag).Println(string(buf))
 			case ch := <-w.chclose:
 				ch <- struct{}{}
@@ -280,21 +285,20 @@ func (w *Writer) OuterLog(tag string, level Level) io.Writer {
 			}
 		}
 	}()
-	w.o = &outer{
-		ch:  ch,
+	return &outer{
+		ch:  w.chouter,
 		buf: make([]byte, 0),
 	}
-	return w.o
 }
 
 func (w *Writer) Close() error {
-	if w.o == nil {
+	if w.chclose == nil {
 		return e.New("already close")
 	}
 	ch := make(chan struct{})
 	w.chclose <- ch
 	<-ch
-	w.o = nil
+	w.chclose = nil
 	return nil
 }
 
@@ -302,7 +306,7 @@ type Generic struct {
 	f       Formatter
 	s       Storer
 	chclose chan chan struct{}
-	o       *outer
+	chouter chan []byte
 	r       Ruler
 }
 
@@ -356,16 +360,19 @@ func (g *Generic) Commit(entry Entry) {
 }
 
 func (g *Generic) OuterLog(tag string, level Level) io.Writer {
-	if g.o != nil {
-		return g.o
+	if g.chouter != nil {
+		return &outer{
+			ch:  g.chouter,
+			buf: make([]byte, 0),
+		}
 	}
 	g.chclose = make(chan chan struct{})
-	ch := make(chan []byte)
+	g.chouter = make(chan []byte)
 	logger := g.f.NewEntry(g).Tag("outer").EntryLevel(level)
 	go func() {
 		for {
 			select {
-			case buf := <-ch:
+			case buf := <-g.chouter:
 				logger.Tag(tag).Println(string(buf))
 			case ch := <-g.chclose:
 				ch <- struct{}{}
@@ -373,20 +380,19 @@ func (g *Generic) OuterLog(tag string, level Level) io.Writer {
 			}
 		}
 	}()
-	g.o = &outer{
-		ch:  ch,
+	return &outer{
+		ch:  g.chouter,
 		buf: make([]byte, 0),
 	}
-	return g.o
 }
 
 func (g *Generic) Close() error {
-	if g.o == nil {
+	if g.chclose == nil {
 		return e.New("already close")
 	}
 	ch := make(chan struct{})
 	g.chclose <- ch
 	<-ch
-	g.o = nil
+	g.chclose = nil
 	return nil
 }
