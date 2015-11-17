@@ -502,7 +502,7 @@ func BenchmarkLogOuterNull(b *testing.B) {
 	if !ok {
 		return
 	}
-	w := olog.OuterLog("tag", DebugPrio)
+	w := olog.OuterLog(DebugPrio, "tag")
 	defer olog.Close()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -539,7 +539,7 @@ func BenchmarkLogOuterFile(b *testing.B) {
 	if !ok {
 		return
 	}
-	w := olog.OuterLog("tag", DebugPrio)
+	w := olog.OuterLog(DebugPrio, "tag")
 	defer olog.Close()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

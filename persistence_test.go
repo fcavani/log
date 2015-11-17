@@ -77,7 +77,7 @@ func testLogBackend(t *testing.T, pers testPers) {
 	if !ok {
 		return
 	}
-	w := olog.OuterLog("tag", InfoPrio)
+	w := olog.OuterLog(InfoPrio, "tag")
 	defer olog.Close()
 	str := "test outer logger\n"
 	n, err := w.Write([]byte(str))

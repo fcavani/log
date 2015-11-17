@@ -152,7 +152,7 @@ type PanicStack interface {
 // logger, in this case the backend that implements OtherLogger
 type OuterLogger interface {
 	// OtherLog creats a writer that receive log entries separeted by \n.
-	OuterLog(tag string, level Level) io.Writer
+	OuterLog(level Level, tags ...string) io.Writer
 	// Close closses the outer logger. If not closed you will have a leeked gorotine.
 	Close() error
 }
