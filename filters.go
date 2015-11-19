@@ -66,9 +66,9 @@ const (
 )
 
 type op struct {
-	field string
-	vleft reflect.Value
-	op    Operation
+	field  string
+	vright reflect.Value
+	op     Operation
 }
 
 func mapfieldmap(entry Entry) (m map[string]reflect.Value) {
@@ -102,69 +102,69 @@ func mapfieldmap(entry Entry) (m map[string]reflect.Value) {
 
 func (o op) Result(entry Entry) bool {
 	mr := mapfieldmap(entry)
-	vrigth, found := mr[o.field]
+	vleft, found := mr[o.field]
 	if !found {
 		panic("logger: field name not found in entry struct")
 	}
-	if o.op != N && o.op != Ex && o.op != Re && o.vleft.IsValid() && o.vleft.Type() != vrigth.Type() {
+	if o.op != N && o.op != Ex && o.op != Re && o.vright.IsValid() && vleft.Type() != o.vright.Type() {
 		panic("logger: type of vleft is not equal to the type of entry")
 	}
 	switch o.op {
 	case Eq:
-		switch o.vleft.Kind() {
+		switch vleft.Kind() {
 		case reflect.Bool:
-			return o.vleft.Bool() == vrigth.Bool()
+			return vleft.Bool() == o.vright.Bool()
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			return o.vleft.Int() == vrigth.Int()
+			return vleft.Int() == o.vright.Int()
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			return o.vleft.Uint() == vrigth.Uint()
+			return vleft.Uint() == o.vright.Uint()
 		case reflect.Float32, reflect.Float64:
-			return o.vleft.Float() == vrigth.Float()
+			return vleft.Float() == o.vright.Float()
 		case reflect.String:
-			return o.vleft.String() == vrigth.String()
+			return vleft.String() == o.vright.String()
 		case reflect.Struct:
-			tl, okl := o.vleft.Interface().(time.Time)
-			tr, okr := vrigth.Interface().(time.Time)
+			tl, okl := vleft.Interface().(time.Time)
+			tr, okr := o.vright.Interface().(time.Time)
 			if !okl || !okr {
-				return reflect.DeepEqual(o.vleft.Interface(), vrigth.Interface())
+				return reflect.DeepEqual(vleft.Interface(), o.vright.Interface())
 			}
 			return tl.Equal(tr)
 		default:
-			return reflect.DeepEqual(o.vleft.Interface(), vrigth.Interface())
+			return reflect.DeepEqual(vleft.Interface(), o.vright.Interface())
 		}
 	case Ne:
-		switch o.vleft.Kind() {
+		switch vleft.Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			return o.vleft.Int() != vrigth.Int()
+			return vleft.Int() != o.vright.Int()
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			return o.vleft.Uint() != vrigth.Uint()
+			return vleft.Uint() != o.vright.Uint()
 		case reflect.Float32, reflect.Float64:
-			return o.vleft.Float() != vrigth.Float()
+			return vleft.Float() != o.vright.Float()
 		case reflect.String:
-			return o.vleft.String() != vrigth.String()
+			return vleft.String() != o.vright.String()
 		case reflect.Struct:
-			tl, okl := o.vleft.Interface().(time.Time)
-			tr, okr := vrigth.Interface().(time.Time)
+			tl, okl := vleft.Interface().(time.Time)
+			tr, okr := o.vright.Interface().(time.Time)
 			if !okl || !okr {
-				return !reflect.DeepEqual(o.vleft.Interface(), vrigth.Interface())
+				return !reflect.DeepEqual(vleft.Interface(), o.vright.Interface())
 			}
 			return !tl.Equal(tr)
 		default:
-			return !reflect.DeepEqual(o.vleft.Interface(), vrigth.Interface())
+			return !reflect.DeepEqual(vleft.Interface(), o.vright.Interface())
 		}
 	case Lt:
-		switch o.vleft.Kind() {
+		switch vleft.Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			return o.vleft.Int() < vrigth.Int()
+			return vleft.Int() < o.vright.Int()
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			return o.vleft.Uint() < vrigth.Uint()
+			return vleft.Uint() < o.vright.Uint()
 		case reflect.Float32, reflect.Float64:
-			return o.vleft.Float() < vrigth.Float()
+			return vleft.Float() < o.vright.Float()
 		case reflect.String:
-			return o.vleft.String() < vrigth.String()
+			return vleft.String() < o.vright.String()
 		case reflect.Struct:
-			tl, okl := o.vleft.Interface().(time.Time)
-			tr, okr := vrigth.Interface().(time.Time)
+			tl, okl := vleft.Interface().(time.Time)
+			tr, okr := o.vright.Interface().(time.Time)
 			if !okl || !okr {
 				panic("logger: struct is not time.Time")
 			}
@@ -173,18 +173,18 @@ func (o op) Result(entry Entry) bool {
 			panic("logger: field type of entry is not supported")
 		}
 	case Gt:
-		switch o.vleft.Kind() {
+		switch vleft.Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			return o.vleft.Int() > vrigth.Int()
+			return vleft.Int() > o.vright.Int()
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			return o.vleft.Uint() > vrigth.Uint()
+			return vleft.Uint() > o.vright.Uint()
 		case reflect.Float32, reflect.Float64:
-			return o.vleft.Float() > vrigth.Float()
+			return vleft.Float() > o.vright.Float()
 		case reflect.String:
-			return o.vleft.String() > vrigth.String()
+			return vleft.String() > o.vright.String()
 		case reflect.Struct:
-			tl, okl := o.vleft.Interface().(time.Time)
-			tr, okr := vrigth.Interface().(time.Time)
+			tl, okl := vleft.Interface().(time.Time)
+			tr, okr := o.vright.Interface().(time.Time)
 			if !okl || !okr {
 				panic("logger: struct is not time.Time")
 			}
@@ -193,18 +193,18 @@ func (o op) Result(entry Entry) bool {
 			panic("logger: field type of entry is not supported")
 		}
 	case Le:
-		switch o.vleft.Kind() {
+		switch vleft.Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			return o.vleft.Int() <= vrigth.Int()
+			return vleft.Int() <= o.vright.Int()
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			return o.vleft.Uint() <= vrigth.Uint()
+			return vleft.Uint() <= o.vright.Uint()
 		case reflect.Float32, reflect.Float64:
-			return o.vleft.Float() <= vrigth.Float()
+			return vleft.Float() <= o.vright.Float()
 		case reflect.String:
-			return o.vleft.String() <= vrigth.String()
+			return vleft.String() <= o.vright.String()
 		case reflect.Struct:
-			tl, okl := o.vleft.Interface().(time.Time)
-			tr, okr := vrigth.Interface().(time.Time)
+			tl, okl := vleft.Interface().(time.Time)
+			tr, okr := o.vright.Interface().(time.Time)
 			if !okl || !okr {
 				panic("logger: struct is not time.Time")
 			}
@@ -213,18 +213,18 @@ func (o op) Result(entry Entry) bool {
 			panic("logger: field type of entry is not supported")
 		}
 	case Ge:
-		switch o.vleft.Kind() {
+		switch vleft.Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			return o.vleft.Int() >= vrigth.Int()
+			return vleft.Int() >= o.vright.Int()
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			return o.vleft.Uint() >= vrigth.Uint()
+			return vleft.Uint() >= o.vright.Uint()
 		case reflect.Float32, reflect.Float64:
-			return o.vleft.Float() >= vrigth.Float()
+			return vleft.Float() >= o.vright.Float()
 		case reflect.String:
-			return o.vleft.String() >= vrigth.String()
+			return vleft.String() >= o.vright.String()
 		case reflect.Struct:
-			tl, okl := o.vleft.Interface().(time.Time)
-			tr, okr := vrigth.Interface().(time.Time)
+			tl, okl := vleft.Interface().(time.Time)
+			tr, okr := o.vright.Interface().(time.Time)
 			if !okl || !okr {
 				panic("logger: struct is not time.Time")
 			}
@@ -233,17 +233,17 @@ func (o op) Result(entry Entry) bool {
 			panic("logger: field type of entry is not supported")
 		}
 	case N:
-		return vrigth.Kind() == reflect.Bool && !vrigth.Bool()
+		return vleft.Kind() == reflect.Bool && !vleft.Bool()
 	case Ex:
-		switch vrigth.Kind() {
+		switch vleft.Kind() {
 		case reflect.Slice:
-			if o.vleft.Kind() != reflect.String {
+			if o.vright.Kind() != reflect.String {
 				panic("logger: contains only works with vleft of string type")
 			}
-			tag := o.vleft.String()
-			tagsr, okr := vrigth.Interface().(tags.Tags)
+			tag := o.vright.String()
+			tagsr, okr := vleft.Interface().(tags.Tags)
 			if !okr {
-				panic("logger: vrigth must be of *tags.Tags")
+				panic("logger: o.vright must be of *tags.Tags")
 			}
 			ptr := &tagsr
 			return ptr.Exist(tag)
@@ -251,40 +251,40 @@ func (o op) Result(entry Entry) bool {
 			panic("logger: field type of entry is not supported")
 		}
 	case Cnts:
-		switch vrigth.Kind() {
+		switch vleft.Kind() {
 		case reflect.String:
-			if o.vleft.Kind() != reflect.String {
+			if o.vright.Kind() != reflect.String {
 				panic("logger: contains only works with vleft of string type")
 			}
-			return strings.Contains(vrigth.String(), o.vleft.String())
+			return strings.Contains(vleft.String(), o.vright.String())
 		default:
 			panic("logger: field type of entry is not supported")
 		}
 	case Re:
-		switch vrigth.Kind() {
+		switch vleft.Kind() {
 		case reflect.String:
-			if o.vleft.Kind() == reflect.String {
-				re := regexp.MustCompile(o.vleft.String())
-				return re.MatchString(vrigth.String())
-			} else if o.vleft.Kind() == reflect.Struct {
-				re, ok := o.vleft.Interface().(regexp.Regexp)
+			if o.vright.Kind() == reflect.String {
+				re := regexp.MustCompile(o.vright.String())
+				return re.MatchString(vleft.String())
+			} else if o.vright.Kind() == reflect.Struct {
+				re, ok := o.vright.Interface().(regexp.Regexp)
 				if !ok {
 					panic("logger: Re operator: struct isn't of type *regexp.Regexp")
 				}
 				pre := &re
-				return pre.MatchString(vrigth.String())
+				return pre.MatchString(vleft.String())
 			}
 			panic("logger: contains only works with vleft of string type or *regexp.Regexp")
 		default:
 			panic("logger: field type of entry is not supported")
 		}
 	case Pr:
-		switch vrigth.Kind() {
+		switch vleft.Kind() {
 		case reflect.String:
-			if o.vleft.Kind() != reflect.String {
+			if o.vright.Kind() != reflect.String {
 				panic("logger: begins only works with vleft of string type")
 			}
-			return strings.HasPrefix(vrigth.String(), o.vleft.String())
+			return strings.HasPrefix(vleft.String(), o.vright.String())
 		default:
 			panic("logger: field type of entry is not supported")
 		}
@@ -307,9 +307,9 @@ func Op(o Operation, field string, vleft ...interface{}) Ruler {
 		}
 	}
 	return &op{
-		field: field,
-		vleft: val,
-		op:    o,
+		field:  field,
+		vright: val,
+		op:     o,
 	}
 }
 

@@ -235,11 +235,11 @@ func (l *log) Sorter(r Ruler) Logger {
 
 func (l *log) SetLevel(scope string, level Level) Logger {
 	if scope == "all" {
-		l.DefLevel = Op(Le, "level", level)
+		l.DefLevel = Op(Ge, "level", level)
 	} else {
 		l.Levels[scope] = &If{
 			Condition: Op(Pr, "pkg", scope),
-			Than:      Op(Le, "level", level),
+			Than:      Op(Ge, "level", level),
 		}
 	}
 	ifs := make([]*If, 0, len(l.Levels))

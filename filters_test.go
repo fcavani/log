@@ -504,77 +504,77 @@ func TestNe(t *testing.T) {
 }
 
 func TestLt(t *testing.T) {
-	ruler := Op(Lt, "int", 1)
+	ruler := Op(Lt, "int", 2)
 	r := ruler.Result(&testEntry{
-		Integer: 2,
+		Integer: 1,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Lt, "int", 1)
+	ruler = Op(Lt, "int", 0)
 	r = ruler.Result(&testEntry{
-		Integer: 0,
+		Integer: 1,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
 
-	ruler = Op(Lt, "uint", uint(1))
+	ruler = Op(Lt, "uint", uint(2))
 	r = ruler.Result(&testEntry{
-		Uinteger: 2,
+		Uinteger: 1,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Lt, "uint", uint(1))
+	ruler = Op(Lt, "uint", uint(0))
 	r = ruler.Result(&testEntry{
-		Uinteger: 0,
+		Uinteger: 1,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
 
-	ruler = Op(Lt, "float", float32(1))
+	ruler = Op(Lt, "float", float32(2))
 	r = ruler.Result(&testEntry{
-		Float: 2,
+		Float: 1,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Lt, "float", float32(1))
+	ruler = Op(Lt, "float", float32(0))
 	r = ruler.Result(&testEntry{
-		Float: 0,
+		Float: 1,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
 
-	ruler = Op(Lt, "str", "a")
-	r = ruler.Result(&testEntry{
-		Str: "b",
-	})
-	if !r {
-		t.Fatal("result is invalid")
-	}
 	ruler = Op(Lt, "str", "b")
 	r = ruler.Result(&testEntry{
 		Str: "a",
+	})
+	if !r {
+		t.Fatal("result is invalid")
+	}
+	ruler = Op(Lt, "str", "a")
+	r = ruler.Result(&testEntry{
+		Str: "b",
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
 
 	now := time.Now()
-	ruler = Op(Lt, "time", now)
+	ruler = Op(Lt, "time", time.Now())
 	r = ruler.Result(&testEntry{
-		Time: time.Now(),
+		Time: now,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Lt, "time", time.Now())
+	ruler = Op(Lt, "time", now)
 	r = ruler.Result(&testEntry{
-		Time: now,
+		Time: time.Now(),
 	})
 	if r {
 		t.Fatal("result is invalid")
@@ -617,77 +617,77 @@ func TestLt(t *testing.T) {
 }
 
 func TestGt(t *testing.T) {
-	ruler := Op(Gt, "int", 1)
+	ruler := Op(Gt, "int", 2)
 	r := ruler.Result(&testEntry{
-		Integer: 2,
+		Integer: 1,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Gt, "int", 1)
+	ruler = Op(Gt, "int", 0)
 	r = ruler.Result(&testEntry{
-		Integer: 0,
+		Integer: 1,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
 
-	ruler = Op(Gt, "uint", uint(1))
+	ruler = Op(Gt, "uint", uint(2))
 	r = ruler.Result(&testEntry{
-		Uinteger: 2,
+		Uinteger: 1,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Gt, "uint", uint(1))
+	ruler = Op(Gt, "uint", uint(0))
 	r = ruler.Result(&testEntry{
-		Uinteger: 0,
+		Uinteger: 1,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
 
-	ruler = Op(Gt, "float", float32(1))
+	ruler = Op(Gt, "float", float32(2))
 	r = ruler.Result(&testEntry{
-		Float: 2,
+		Float: 1,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Gt, "float", float32(1))
+	ruler = Op(Gt, "float", float32(0))
 	r = ruler.Result(&testEntry{
-		Float: 0,
+		Float: 1,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
 
-	ruler = Op(Gt, "str", "a")
-	r = ruler.Result(&testEntry{
-		Str: "b",
-	})
-	if r {
-		t.Fatal("result is invalid")
-	}
 	ruler = Op(Gt, "str", "b")
 	r = ruler.Result(&testEntry{
 		Str: "a",
+	})
+	if r {
+		t.Fatal("result is invalid")
+	}
+	ruler = Op(Gt, "str", "a")
+	r = ruler.Result(&testEntry{
+		Str: "b",
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
 
 	now := time.Now()
-	ruler = Op(Gt, "time", now)
+	ruler = Op(Gt, "time", time.Now())
 	r = ruler.Result(&testEntry{
-		Time: time.Now(),
+		Time: now,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Gt, "time", time.Now())
+	ruler = Op(Gt, "time", now)
 	r = ruler.Result(&testEntry{
-		Time: now,
+		Time: time.Now(),
 	})
 	if !r {
 		t.Fatal("result is invalid")
@@ -729,77 +729,77 @@ func TestGt(t *testing.T) {
 }
 
 func TestLe(t *testing.T) {
-	ruler := Op(Le, "int", 1)
+	ruler := Op(Le, "int", 2)
 	r := ruler.Result(&testEntry{
-		Integer: 2,
+		Integer: 1,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Le, "int", 1)
+	ruler = Op(Le, "int", 0)
 	r = ruler.Result(&testEntry{
-		Integer: 0,
+		Integer: 1,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
 
-	ruler = Op(Le, "uint", uint(1))
+	ruler = Op(Le, "uint", uint(2))
 	r = ruler.Result(&testEntry{
-		Uinteger: 2,
+		Uinteger: 1,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Le, "uint", uint(1))
+	ruler = Op(Le, "uint", uint(0))
 	r = ruler.Result(&testEntry{
-		Uinteger: 0,
+		Uinteger: 1,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
 
-	ruler = Op(Le, "float", float32(1))
+	ruler = Op(Le, "float", float32(2))
 	r = ruler.Result(&testEntry{
-		Float: 2,
+		Float: 1,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Le, "float", float32(1))
+	ruler = Op(Le, "float", float32(0))
 	r = ruler.Result(&testEntry{
-		Float: 0,
+		Float: 1,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
 
-	ruler = Op(Le, "str", "a")
-	r = ruler.Result(&testEntry{
-		Str: "b",
-	})
-	if !r {
-		t.Fatal("result is invalid")
-	}
 	ruler = Op(Le, "str", "b")
 	r = ruler.Result(&testEntry{
 		Str: "a",
+	})
+	if !r {
+		t.Fatal("result is invalid")
+	}
+	ruler = Op(Le, "str", "a")
+	r = ruler.Result(&testEntry{
+		Str: "b",
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
 
 	now := time.Now()
-	ruler = Op(Le, "time", now)
+	ruler = Op(Le, "time", time.Now())
 	r = ruler.Result(&testEntry{
-		Time: time.Now(),
+		Time: now,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Le, "time", time.Now())
+	ruler = Op(Le, "time", now)
 	r = ruler.Result(&testEntry{
-		Time: now,
+		Time: time.Now(),
 	})
 	if r {
 		t.Fatal("result is invalid")
@@ -841,77 +841,77 @@ func TestLe(t *testing.T) {
 }
 
 func TestGe(t *testing.T) {
-	ruler := Op(Ge, "int", 1)
+	ruler := Op(Ge, "int", 2)
 	r := ruler.Result(&testEntry{
-		Integer: 2,
+		Integer: 1,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Ge, "int", 1)
+	ruler = Op(Ge, "int", 0)
 	r = ruler.Result(&testEntry{
-		Integer: 0,
+		Integer: 1,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
 
-	ruler = Op(Ge, "uint", uint(1))
+	ruler = Op(Ge, "uint", uint(2))
 	r = ruler.Result(&testEntry{
-		Uinteger: 2,
+		Uinteger: 1,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Ge, "uint", uint(1))
+	ruler = Op(Ge, "uint", uint(0))
 	r = ruler.Result(&testEntry{
-		Uinteger: 0,
+		Uinteger: 1,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
 
-	ruler = Op(Ge, "float", float32(1))
+	ruler = Op(Ge, "float", float32(2))
 	r = ruler.Result(&testEntry{
-		Float: 2,
+		Float: 1,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Ge, "float", float32(1))
+	ruler = Op(Ge, "float", float32(0))
 	r = ruler.Result(&testEntry{
-		Float: 0,
+		Float: 1,
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
 
-	ruler = Op(Ge, "str", "a")
-	r = ruler.Result(&testEntry{
-		Str: "b",
-	})
-	if r {
-		t.Fatal("result is invalid")
-	}
 	ruler = Op(Ge, "str", "b")
 	r = ruler.Result(&testEntry{
 		Str: "a",
+	})
+	if r {
+		t.Fatal("result is invalid")
+	}
+	ruler = Op(Ge, "str", "a")
+	r = ruler.Result(&testEntry{
+		Str: "b",
 	})
 	if !r {
 		t.Fatal("result is invalid")
 	}
 
 	now := time.Now()
-	ruler = Op(Ge, "time", now)
+	ruler = Op(Ge, "time", time.Now())
 	r = ruler.Result(&testEntry{
-		Time: time.Now(),
+		Time: now,
 	})
 	if r {
 		t.Fatal("result is invalid")
 	}
-	ruler = Op(Ge, "time", time.Now())
+	ruler = Op(Ge, "time", now)
 	r = ruler.Result(&testEntry{
-		Time: now,
+		Time: time.Now(),
 	})
 	if !r {
 		t.Fatal("result is invalid")
