@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/fcavani/e"
@@ -95,6 +96,11 @@ func stringfy(val reflect.Value) (str string) {
 		str, _ = strinter(val)
 	}
 	return
+}
+
+func scapeSep(in string, sep []byte) string {
+	scape := scapemark(sep)
+	return strings.Replace(in, string(sep), string(scape), -1)
 }
 
 // StdFormatter is a formatter for the log data. The fild in Entry
@@ -192,14 +198,14 @@ func (s StdFormatter) Format(entry Entry) (out []byte, err error) {
 		fidx, found := s.Idx[bname]
 		if found {
 			fval := val.Field(fidx.I)
-			v = stringfy(fval)
+			v = scapeSep(stringfy(fval), s.Delim)
 		} else {
 			inter, found := s.Map[bname]
 			if !found {
 				v = ""
 			} else {
 				fval := reflect.Indirect(reflect.ValueOf(inter))
-				v = stringfy(fval)
+				v = scapeSep(stringfy(fval), s.Delim)
 			}
 		}
 		if v == "" {
