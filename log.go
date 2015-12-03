@@ -570,3 +570,17 @@ func SetLevel(scope string, l Level) Logger {
 func EntryLevel(prio Level) Logger {
 	return Log.EntryLevel(prio)
 }
+
+// RecoverBufferStack amont of buffer to store the stack.
+var RecoverBufferStack = 4096
+
+// Recover from panic and log the stack. If notexit is false, call os.Exit(1),
+// if not continue.
+func Recover(notexit bool) {
+	if r := recover(); r != nil {
+		buf := make([]byte, RecoverBufferStack)
+		n := runtime.Stack(buf, true)
+		buf = buf[:n]
+		Log.GoPanic(r, buf, notexit)
+	}
+}
