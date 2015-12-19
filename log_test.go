@@ -223,6 +223,7 @@ func TestMultiLine(t *testing.T) {
 		map[string]interface{}{
 			"host": "",
 		},
+		"",
 	)
 	buf := bytes.NewBuffer([]byte{})
 	multi := NewMulti(NewWriter(buf), formatter, NewWriter(os.Stdout), formatter)

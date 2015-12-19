@@ -156,6 +156,7 @@ func TestFormat(t *testing.T) {
 		"d",
 		&entryTest{},
 		map[string]interface{}{},
+		"",
 	)
 	f.Entry(&entryTest{})
 	for i, test := range tests {
@@ -177,6 +178,7 @@ func TestFormatInvalid(t *testing.T) {
 		"d",
 		&entryTest{},
 		map[string]interface{}{},
+		"",
 	)
 	f.Entry(&entryTest{})
 	_, err := f.Format(&entryTest2{})
@@ -193,6 +195,7 @@ func TestNewEntry(t *testing.T) {
 		"::host - ::domain - ::date - ::level - ::tags - ::msg",
 		&log{Labels: &tags.Tags{}},
 		map[string]interface{}{"host": "no host"},
+		"",
 	)
 	buf := bytes.NewBuffer([]byte{})
 	multi := NewMulti(NewWriter(buf), f, NewWriter(os.Stdout), f)

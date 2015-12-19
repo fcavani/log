@@ -59,14 +59,14 @@ func scapemark(in []byte) []byte {
 	return buf
 }
 
-func strinter(val reflect.Value) (str string, err error) {
+func strinter(val reflect.Value, format string) (str string, err error) {
 	inter := val.Interface()
 	if inter == nil {
 		return "", e.New("interface is nil")
 	}
 	switch i := inter.(type) {
 	case time.Time:
-		str = i.Format(TimeDateFormat)
+		str = i.Format(format)
 		return
 	case fmt.Stringer:
 		str = i.String()
@@ -75,7 +75,7 @@ func strinter(val reflect.Value) (str string, err error) {
 	return "", e.New("interface don't implement String method")
 }
 
-func stringfy(val reflect.Value) (str string) {
+func stringfy(val reflect.Value, format string) (str string) {
 	var err error
 	switch val.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
@@ -83,7 +83,7 @@ func stringfy(val reflect.Value) (str string) {
 	case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		str = strconv.FormatUint(val.Uint(), 10)
 	case reflect.Uint8:
-		str, err = strinter(val)
+		str, err = strinter(val, format)
 		if err == nil {
 			return
 		}
@@ -93,7 +93,7 @@ func stringfy(val reflect.Value) (str string) {
 	case reflect.String:
 		str = val.String()
 	default:
-		str, _ = strinter(val)
+		str, _ = strinter(val, format)
 	}
 	return
 }
@@ -119,6 +119,8 @@ type StdFormatter struct {
 		I   int
 		Def string
 	}
+	// TimeFormat is the string with the template of date and time format.
+	TimeFormat string
 }
 
 func init() {
@@ -126,7 +128,7 @@ func init() {
 }
 
 // NewStdFormatter crete a new formatter.
-func NewStdFormatter(delim, tmpl string, entry Entry, values map[string]interface{}) (Formatter, error) {
+func NewStdFormatter(delim, tmpl string, entry Entry, values map[string]interface{}, timeformat string) (Formatter, error) {
 	if delim == "" {
 		return nil, e.New("invalid delimitator")
 	}
@@ -139,12 +141,16 @@ func NewStdFormatter(delim, tmpl string, entry Entry, values map[string]interfac
 	if values == nil {
 		return nil, e.New("invalid values")
 	}
+	if timeformat == "" {
+		timeformat = TimeDateFormat
+	}
 	return &StdFormatter{
-		Delim: []byte(delim),
-		Tmpl:  []byte(tmpl),
-		E:     entry,
-		Map:   values,
-		Idx:   mkindex(entry),
+		Delim:      []byte(delim),
+		Tmpl:       []byte(tmpl),
+		E:          entry,
+		Map:        values,
+		Idx:        mkindex(entry),
+		TimeFormat: timeformat,
 	}, nil
 }
 
@@ -198,14 +204,14 @@ func (s StdFormatter) Format(entry Entry) (out []byte, err error) {
 		fidx, found := s.Idx[bname]
 		if found {
 			fval := val.Field(fidx.I)
-			v = scapeSep(stringfy(fval), s.Delim)
+			v = scapeSep(stringfy(fval, s.TimeFormat), s.Delim)
 		} else {
 			inter, found := s.Map[bname]
 			if !found {
 				v = ""
 			} else {
 				fval := reflect.Indirect(reflect.ValueOf(inter))
-				v = scapeSep(stringfy(fval), s.Delim)
+				v = scapeSep(stringfy(fval, s.TimeFormat), s.Delim)
 			}
 		}
 		if v == "" {
@@ -229,4 +235,12 @@ func (s *StdFormatter) Entry(entry Entry) {
 
 func (s *StdFormatter) NewEntry(b LogBackend) Logger {
 	return deepcopy.Iface(s.E).(Logger).SetStore(b)
+}
+
+func (s *StdFormatter) SetTimeFormat(format string) {
+	if format == "" {
+		s.TimeFormat = TimeDateFormat
+		return
+	}
+	s.TimeFormat = format
 }

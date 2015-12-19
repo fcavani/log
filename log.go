@@ -35,6 +35,7 @@ func init() {
 		map[string]interface{}{
 			"host": hostname,
 		},
+		"",
 	)
 	Log = New(
 		NewWriter(os.Stdout).F(DefFormatter),

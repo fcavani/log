@@ -63,6 +63,8 @@ type Formatter interface {
 	Entry(entry Entry)
 	// NewEntry creates a new log entry
 	NewEntry(b LogBackend) Logger
+	// Set the time format string if empty use the default.
+	SetTimeFormat(s string)
 }
 
 type LogBackend interface {
