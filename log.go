@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/fcavani/e"
@@ -58,6 +59,7 @@ type log struct {
 	Func      string `log:"func"`
 	Levels    map[string]*If
 	DefLevel  Ruler
+	lck       sync.Mutex
 }
 
 func init() {
@@ -109,6 +111,8 @@ func (l *log) Logfmt(enc *logfmt.Encoder) error {
 }
 
 func (l *log) clone() *log {
+	l.lck.Lock()
+	defer l.lck.Unlock()
 	return &log{
 		Timestamp: l.Timestamp,
 		Priority:  l.Priority,
@@ -235,6 +239,8 @@ func (l *log) Sorter(r Ruler) Logger {
 }
 
 func (l *log) SetLevel(scope string, level Level) Logger {
+	l.lck.Lock()
+	defer l.lck.Unlock()
 	if scope == "all" {
 		l.DefLevel = Op(Ge, "level", level)
 	} else {

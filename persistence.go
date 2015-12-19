@@ -207,15 +207,21 @@ func NewWriter(w io.Writer) LogBackend {
 }
 
 func (w *Writer) F(f Formatter) LogBackend {
+	w.lck.Lock()
+	defer w.lck.Unlock()
 	w.f = f
 	return w
 }
 
 func (w *Writer) GetF() Formatter {
+	w.lck.Lock()
+	defer w.lck.Unlock()
 	return w.f
 }
 
 func (w *Writer) Filter(r Ruler) LogBackend {
+	w.lck.Lock()
+	defer w.lck.Unlock()
 	w.r = r
 	return w
 }
