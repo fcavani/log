@@ -9,7 +9,7 @@ Log package is much like the go log package. But it have a fill more tricks, lik
 First import: `import "github.com/fcavani/log"`
 Than use one of the free functions in the [documentation](https://godoc.org/github.com/fcavani/log).
 
-```
+``` go
 // Normal log
 log.Println("log this")
 // Log error
@@ -22,7 +22,7 @@ log.Panic("panic!")
 
 Modificators:
 
-```
+``` go
 // Associate a tag with the log.
 log.Tag("tag").Println("test")
 // More tags
@@ -33,13 +33,13 @@ log.ProtoLevel().Println("some dirty protocol thing")
 
 Setting the default level:
 
-```
+``` go
 log.SetLevel("all", log.WarnPrio)
 ```
 
 In place of `"all"`, you can put the name of one package, than that level
 will be restrict to this package. You can repeat this functions for any
-package. 
+package.
 
 #Change the log format
 
@@ -49,7 +49,7 @@ the separator, the template, with fields named after the struct that implements
 a map with values that appears in template string but not appears in the struct,
 like host in the example below.
 
-```
+``` go
 form, _ := log.NewStdFormatter(
   "::",
   "::host - ::domain - ::date - ::level - ::tags - ::file ::msg",
@@ -145,7 +145,7 @@ can be used to store the log entry.
 
 ## Example 1
 
-```
+``` go
 // Write to stdout with DefFormatter formatter.
 Log = log.New(
   log.NewWriter(os.Stdout).F(log.DefFormatter),
@@ -154,7 +154,7 @@ Log = log.New(
 ```
 
 ## Example 2
-```
+``` go
 // Write to stdout and to MongoDb
 mongodb, _ = log.NewMongoDb(...)
 Log = log.New(
@@ -182,7 +182,7 @@ can be used to filter one log entry.
 
 ## Example
 
-```
+``` go
 Log = log.New(
   log.Filter(
     log.NewWriter(buf),
