@@ -41,7 +41,8 @@ func init() {
 	Log = New(
 		NewWriter(os.Stdout).F(DefFormatter),
 		false,
-	)
+	).SetLevel("all", InfoPrio)
+
 }
 
 type log struct {
