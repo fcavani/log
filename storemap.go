@@ -32,16 +32,16 @@ func searchString(idx []string, key string) int {
 }
 
 type Map struct {
-	M   map[string]interface{}
-	Idx []string
+	M    map[string]interface{}
+	Idx  []string
 	size int
-	lck sync.RWMutex
+	lck  sync.RWMutex
 }
 
 func NewMap(size int) (Storer, error) {
 	return &Map{
-		M:   make(map[string]interface{}, size),
-		Idx: make([]string, 0, size),
+		M:    make(map[string]interface{}, size),
+		Idx:  make([]string, 0, size),
 		size: size,
 	}, nil
 }
@@ -245,5 +245,9 @@ func (m *Map) Drop() error {
 	defer m.lck.Unlock()
 	m.M = make(map[string]interface{}, m.size)
 	m.Idx = make([]string, 0, m.size)
+	return nil
+}
+
+func (m *Map) Close() error {
 	return nil
 }

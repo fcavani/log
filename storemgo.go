@@ -5,11 +5,11 @@
 package log
 
 import (
-	"time"
-	"reflect"
 	"net/url"
-	 "strings"
-	
+	"reflect"
+	"strings"
+	"time"
+
 	"github.com/fcavani/e"
 	"github.com/fcavani/types"
 	"gopkg.in/mgo.v2"
@@ -56,12 +56,12 @@ func chkData(i interface{}) error {
 }
 
 type MongoDb struct {
-	session *mgo.Session
-	db *mgo.Database
-	dbname string
-	c *mgo.Collection
+	session    *mgo.Session
+	db         *mgo.Database
+	dbname     string
+	c          *mgo.Collection
 	collection string
-	tentry reflect.Type
+	tentry     reflect.Type
 }
 
 func NewMongoDb(rawurl, collection string, safe *mgo.Safe, entry Entry, timeout time.Duration) (Storer, error) {
@@ -99,8 +99,8 @@ func (m *MongoDb) SupportTx() bool {
 }
 
 type txMongoDb struct {
-	c *mgo.Collection
-	tentry reflect.Type
+	c        *mgo.Collection
+	tentry   reflect.Type
 	writeble bool
 }
 
@@ -156,11 +156,11 @@ func (t *txMongoDb) Del(key string) error {
 }
 
 type cursorMongoDb struct {
-	iter *mgo.Iter
-	c *mgo.Collection
-	tentry reflect.Type
+	iter     *mgo.Iter
+	c        *mgo.Collection
+	tentry   reflect.Type
 	writeble bool
-	dir dir
+	dir      dir
 }
 
 type dir uint8
@@ -173,12 +173,12 @@ const (
 func (c *cursorMongoDb) First() (key string, data interface{}) {
 	c.iter = c.c.Find(nil).Sort("key").Iter()
 	c.dir = LeftToRight
-	
+
 	val := types.Make(c.tentry)
 	inter := val.Interface()
-	
+
 	c.iter.Next(inter)
-	
+
 	key = getKey(inter)
 	if key == "" {
 		return "", nil
@@ -189,12 +189,12 @@ func (c *cursorMongoDb) First() (key string, data interface{}) {
 func (c *cursorMongoDb) Last() (key string, data interface{}) {
 	c.iter = c.c.Find(nil).Sort("-key").Iter()
 	c.dir = RightToLeft
-	
+
 	val := types.Make(c.tentry)
 	inter := val.Interface()
-	
+
 	c.iter.Next(inter)
-	
+
 	key = getKey(inter)
 	if key == "" {
 		return "", nil
@@ -205,12 +205,12 @@ func (c *cursorMongoDb) Last() (key string, data interface{}) {
 func (c *cursorMongoDb) Seek(wanted string) (key string, data interface{}) {
 	c.iter = c.c.Find(bson.M{"key": bson.M{"$gte": wanted}}).Sort("key").Iter()
 	c.dir = LeftToRight
-	
+
 	val := types.Make(c.tentry)
 	inter := val.Interface()
-	
+
 	c.iter.Next(inter)
-	
+
 	key = getKey(inter)
 	if key == "" {
 		return "", nil
@@ -261,8 +261,8 @@ func (c *cursorMongoDb) Del() (err error) {
 
 func (t *txMongoDb) Cursor() Cursor {
 	c := &cursorMongoDb{
-		c: t.c,
-		tentry: t.tentry,
+		c:        t.c,
+		tentry:   t.tentry,
 		writeble: t.writeble,
 	}
 	return c
@@ -278,9 +278,9 @@ func (m *MongoDb) Len() (l uint, err error) {
 
 func (m *MongoDb) Tx(write bool, f func(tx Transaction) error) error {
 	tx := &txMongoDb{
-		c: m.c,
-		tentry: m.tentry,
-		writeble: write, 
+		c:        m.c,
+		tentry:   m.tentry,
+		writeble: write,
 	}
 	err := f(tx)
 	if err != nil {

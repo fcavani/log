@@ -56,6 +56,10 @@ func (s *SendToLogger) Commit(entry Entry) {
 	s.Println(entry.String())
 }
 
+func (s *SendToLogger) Close() error {
+	return nil
+}
+
 // NewSendToLogger creates a logger from a go log.
 func NewSendToLogger(logger *golog.Logger) LogBackend {
 	if logger == nil {
@@ -179,8 +183,14 @@ func (mp *MultiLog) OuterLog(level Level, tags ...string) io.Writer {
 }
 
 func (mp *MultiLog) Close() error {
+	for _, p := range mp.mp {
+		err := p.Close()
+		if err != nil {
+			return e.Forward(err)
+		}
+	}
 	if mp.chclose == nil {
-		return e.New("already close")
+		return nil
 	}
 	ch := make(chan struct{})
 	mp.chclose <- ch
@@ -299,7 +309,7 @@ func (w *Writer) OuterLog(level Level, tags ...string) io.Writer {
 
 func (w *Writer) Close() error {
 	if w.chclose == nil {
-		return e.New("already close")
+		return nil
 	}
 	ch := make(chan struct{})
 	w.chclose <- ch
@@ -393,8 +403,12 @@ func (g *Generic) OuterLog(level Level, tags ...string) io.Writer {
 }
 
 func (g *Generic) Close() error {
+	err := g.s.Close()
+	if err != nil {
+		return e.Forward(err)
+	}
 	if g.chclose == nil {
-		return e.New("already close")
+		return nil
 	}
 	ch := make(chan struct{})
 	g.chclose <- ch

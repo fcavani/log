@@ -360,6 +360,11 @@ func BenchmarkLogFileBuffer(b *testing.B) {
 		logger.Print(msg)
 		b.SetBytes(l)
 	}
+
+	err = back.Close()
+	if err != nil {
+		b.Error(e.Trace(e.Forward(err)))
+	}
 }
 
 func BenchmarkLogfmt(b *testing.B) {
@@ -449,6 +454,11 @@ func BenchmarkBoltDbBuffer(b *testing.B) {
 		logger.Print(msg)
 		b.SetBytes(l)
 	}
+
+	err = logger.Store().Close()
+	if err != nil {
+		b.Error(e.Trace(e.Forward(err)))
+	}
 }
 
 func BenchmarkMongoDb(b *testing.B) {
@@ -490,6 +500,11 @@ func BenchmarkMongoDbBuffer(b *testing.B) {
 	}
 	b.StopTimer()
 	err = mongodb.Drop()
+	if err != nil {
+		b.Error(e.Trace(e.Forward(err)))
+	}
+
+	err = logger.Store().Close()
 	if err != nil {
 		b.Error(e.Trace(e.Forward(err)))
 	}

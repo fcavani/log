@@ -73,3 +73,7 @@ func (l *Logfmt) Commit(entry Entry) {
 		Fail(err)
 	}
 }
+
+func (l *Logfmt) Close() error {
+	return nil
+}

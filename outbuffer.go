@@ -8,6 +8,7 @@ type OutBuffer struct {
 	bak     LogBackend
 	ch      chan Entry
 	chclose chan chan struct{}
+	closed  chan struct{}
 	r       Ruler
 }
 
@@ -16,6 +17,7 @@ func NewOutBuffer(bak LogBackend, size int) LogBackend {
 		bak:     bak,
 		ch:      make(chan Entry, size),
 		chclose: make(chan chan struct{}),
+		closed:  make(chan struct{}),
 	}
 	go func() {
 		for {
@@ -24,6 +26,11 @@ func NewOutBuffer(bak LogBackend, size int) LogBackend {
 				ch <- struct{}{}
 				return
 			case entry := <-o.ch:
+				if entry == nil {
+					o.ch = nil
+					o.closed <- struct{}{}
+					return
+				}
 				o.bak.Commit(entry)
 			}
 		}
@@ -52,8 +59,14 @@ func (o *OutBuffer) Commit(entry Entry) {
 	o.ch <- entry
 }
 
-func (o *OutBuffer) Close() {
-	ch := make(chan struct{})
-	o.chclose <- ch
-	<-ch
+func (o *OutBuffer) Close() error {
+	if o.ch == nil {
+		return nil
+	}
+	close(o.ch)
+	<-o.closed
+	// ch := make(chan struct{})
+	// o.chclose <- ch
+	// <-ch
+	return nil
 }

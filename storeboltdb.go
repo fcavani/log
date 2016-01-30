@@ -9,10 +9,10 @@ import (
 	"encoding/gob"
 	"os"
 	"time"
-	
+
 	"github.com/boltdb/bolt"
-	"github.com/fcavani/e"
 	"github.com/fcavani/buffactory"
+	"github.com/fcavani/e"
 	"github.com/fcavani/types"
 )
 
@@ -21,11 +21,11 @@ var bufmaker *buffactory.BufferFactory
 func init() {
 	bufmaker = &buffactory.BufferFactory{
 		NumBuffersPerSize: 100,
-		MinBuffers: 10,
-		MaxBuffers: 1000,
-		MinBufferSize: 256,
-		MaxBufferSize: 1024,
-		Reposition: 10 *time.Second,
+		MinBuffers:        10,
+		MaxBuffers:        1000,
+		MinBufferSize:     256,
+		MaxBufferSize:     1024,
+		Reposition:        10 * time.Second,
 	}
 	err := bufmaker.StartBufferFactory()
 	if err != nil {
@@ -67,12 +67,12 @@ func (g *Gob) Decode(b []byte) (interface{}, error) {
 }
 
 type BoltDb struct {
-	db *bolt.DB
-	bucket string
-	enc Encoder
-	dec Decoder
-	path string
-	mode os.FileMode
+	db      *bolt.DB
+	bucket  string
+	enc     Encoder
+	dec     Decoder
+	path    string
+	mode    os.FileMode
 	options *bolt.Options
 }
 
@@ -97,9 +97,9 @@ func (b *BoltDb) SupportTx() bool {
 }
 
 type txBoltDb struct {
-	b *bolt.Bucket
-	enc Encoder
-	dec Decoder
+	b    *bolt.Bucket
+	enc  Encoder
+	dec  Decoder
 	bufs [][]byte
 }
 
@@ -149,8 +149,8 @@ func (t *txBoltDb) Del(key string) error {
 }
 
 type cursorBoltDb struct {
-	c *bolt.Cursor
-	b *bolt.Bucket
+	c   *bolt.Cursor
+	b   *bolt.Bucket
 	dec Decoder
 }
 
@@ -324,6 +324,14 @@ func (db *BoltDb) Drop() error {
 	db.db, err = bolt.Open(db.path, db.mode, db.options)
 	if err != nil {
 		return e.New(err)
+	}
+	return nil
+}
+
+func (db *BoltDb) Close() error {
+	err := db.db.Close()
+	if err != nil {
+		return e.Forward(err)
 	}
 	return nil
 }

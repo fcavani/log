@@ -76,6 +76,8 @@ type LogBackend interface {
 	GetF() Formatter
 	//Filter change the filter associated to this backend
 	Filter(r Ruler) LogBackend
+	//Close stop the backend and flush all entries.
+	Close() error
 }
 
 type Cursor interface {
@@ -99,6 +101,7 @@ type Storer interface {
 	Tx(write bool, f func(tx Transaction) error) error
 	Len() (uint, error)
 	Drop() error
+	Close() error
 }
 
 type Levels interface {

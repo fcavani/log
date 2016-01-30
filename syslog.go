@@ -87,3 +87,8 @@ func (s *Syslog) Commit(entry Entry) {
 		}
 	}
 }
+
+func (s *Syslog) Close() error {
+	s.w.Close()
+	return nil
+}

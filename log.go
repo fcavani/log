@@ -309,6 +309,7 @@ func (l *log) Fatal(v ...interface{}) {
 	n.Timestamp = time.Now()
 	n.debugInfo(2)
 	n.store.Commit(n)
+	n.store.Close()
 	os.Exit(1)
 }
 
@@ -319,6 +320,7 @@ func (l *log) Fatalf(f string, v ...interface{}) {
 	n.Timestamp = time.Now()
 	n.debugInfo(2)
 	n.store.Commit(n)
+	n.store.Close()
 	os.Exit(1)
 }
 
@@ -329,6 +331,7 @@ func (l *log) Fatalln(v ...interface{}) {
 	n.Timestamp = time.Now()
 	n.debugInfo(2)
 	n.store.Commit(n)
+	n.store.Close()
 	os.Exit(1)
 }
 
@@ -339,6 +342,7 @@ func (l *log) Panic(v ...interface{}) {
 	n.Timestamp = time.Now()
 	n.debugInfo(2)
 	n.store.Commit(n)
+	n.store.Close()
 	panic(n.Msg)
 }
 
@@ -349,6 +353,7 @@ func (l *log) Panicf(f string, v ...interface{}) {
 	n.Timestamp = time.Now()
 	n.debugInfo(2)
 	n.store.Commit(n)
+	n.store.Close()
 	panic(n.Msg)
 }
 
@@ -359,6 +364,7 @@ func (l *log) Panicln(v ...interface{}) {
 	n.Timestamp = time.Now()
 	n.debugInfo(2)
 	n.store.Commit(n)
+	n.store.Close()
 	panic(n.Msg)
 }
 
@@ -403,6 +409,7 @@ func (l *log) GoPanic(r interface{}, stack []byte, cont bool) {
 	}
 	n.Msg += "\n" + string(stack)
 	n.store.Commit(n)
+	n.store.Close()
 	if !cont {
 		os.Exit(1)
 	}
