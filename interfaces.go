@@ -43,6 +43,8 @@ type Entry interface {
 	EntryLevel(l Level) Logger
 	// DebugInfo write into the struct debug information.
 	DebugInfo() Logger
+	// TODO: Context info
+	// Context(ctx map[string]interface)
 }
 
 type TemplateSetup interface {
