@@ -18,6 +18,9 @@ import (
 	"github.com/fcavani/rand"
 	"github.com/fcavani/types"
 	"github.com/op/go-logging"
+	// TODO: Benchmark cue
+	//"github.com/bobziuchkovski/cue"
+	//"github.com/bobziuchkovski/cue/collector"
 )
 
 func test(t *testing.T, buf *bytes.Buffer, ss ...string) {
@@ -212,7 +215,7 @@ func TestDebug(t *testing.T) {
 	Log = New(multi, true).Domain("test").Tag("tag1")
 
 	Log.Println("teste debug info")
-	test(t, buf, "test", "log/log_test.go:214", "teste debug info")
+	test(t, buf, "test", "log/log_test.go:217", "teste debug info")
 }
 
 func TestMultiLine(t *testing.T) {
