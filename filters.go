@@ -5,12 +5,14 @@
 package log
 
 import (
+	"encoding/gob"
 	"reflect"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/fcavani/tags"
+	"github.com/fcavani/types"
 )
 
 type filter struct {
@@ -448,4 +450,13 @@ func Select(ifs []*If, def Ruler) Ruler {
 		Ifs:     ifs,
 		Default: def,
 	}
+}
+
+func init() {
+	types.Insert(True{})
+	types.Insert(False{})
+	types.Insert(If{})
+	gob.Register(True{})
+	gob.Register(False{})
+	gob.Register(If{})
 }
