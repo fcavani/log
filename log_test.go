@@ -14,13 +14,12 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/bobziuchkovski/cue"
+	"github.com/bobziuchkovski/cue/collector"
 	"github.com/fcavani/e"
 	"github.com/fcavani/rand"
 	"github.com/fcavani/types"
 	"github.com/op/go-logging"
-	// TODO: Benchmark cue
-	//"github.com/bobziuchkovski/cue"
-	//"github.com/bobziuchkovski/cue/collector"
 )
 
 func test(t *testing.T, buf *bytes.Buffer, ss ...string) {
@@ -215,7 +214,7 @@ func TestDebug(t *testing.T) {
 	Log = New(multi, true).Domain("test").Tag("tag1")
 
 	Log.Println("teste debug info")
-	test(t, buf, "test", "log/log_test.go:217", "teste debug info")
+	test(t, buf, "test", "log/log_test.go:21", "teste debug info")
 }
 
 func TestMultiLine(t *testing.T) {
@@ -298,12 +297,43 @@ func BenchmarkGolog(b *testing.B) {
 	}
 }
 
-func BenchmarkLogStderr(b *testing.B) {
+func BenchmarkCue(b *testing.B) {
+	logger := cue.NewLogger("log")
+	cue.Collect(cue.INFO, collector.File{
+		Path: "/dev/null",
+	}.New())
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logger.Info(msg)
+		b.SetBytes(l)
+	}
+}
+
+// func BenchmarkLogStderr(b *testing.B) {
+// 	logger := New(
+// 		NewWriter(os.Stderr).F(DefFormatter),
+// 		false,
+// 	).Domain("test")
+// 	b.ResetTimer()
+// 	for i := 0; i < b.N; i++ {
+// 		logger.Print(msg)
+// 		b.SetBytes(l)
+// 	}
+// }
+
+func BenchmarkLogDevNull(b *testing.B) {
+	file, err := os.Create(os.DevNull)
+	if err != nil {
+		b.Error(e.Trace(e.Forward(err)))
+	}
+	defer file.Close()
 	logger := New(
-		NewWriter(os.Stderr).F(DefFormatter),
+		NewWriter(file).F(DefFormatter),
 		false,
 	).Domain("test")
+
 	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		logger.Print(msg)
 		b.SetBytes(l)
