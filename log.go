@@ -587,7 +587,7 @@ func EntryLevel(prio Level) Logger {
 }
 
 // RecoverBufferStack amont of buffer to store the stack.
-var RecoverBufferStack = 4096
+var RecoverBufferStack = 10485760
 
 // Recover from panic and log the stack. If notexit is false, call os.Exit(1),
 // if not continue.
