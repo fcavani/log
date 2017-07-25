@@ -63,9 +63,16 @@ type log struct {
 	lck       sync.Mutex
 }
 
+var onetime sync.Once
+
 func init() {
-	gob.Register(&log{})
-	types.Insert(&log{})
+	onetime.Do(func() {
+		defer func() {
+			recover()
+		}()
+		gob.Register(&log{})
+		types.Insert(&log{})
+	})
 }
 
 func New(b LogBackend, debug bool) *log {

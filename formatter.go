@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/fcavani/e"
@@ -123,8 +124,15 @@ type StdFormatter struct {
 	TimeFormat string
 }
 
+var once sync.Once
+
 func init() {
-	gob.Register(&StdFormatter{})
+	once.Do(func() {
+		defer func() {
+			recover()
+		}()
+		gob.Register(&StdFormatter{})
+	})
 }
 
 // NewStdFormatter crete a new formatter.
